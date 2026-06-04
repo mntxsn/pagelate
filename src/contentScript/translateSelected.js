@@ -258,13 +258,11 @@ Promise.all([twpConfig.onReady(), getTabHostName()]).then(function (_) {
 					<li value="de" title="German">de</li>
 				</ul>
 				<div id="moreOrLess"><i class="arrow up" id="more"></i><i class="arrow down" id="less"></i></div>
-				<ul>
-					<li title="Google" id="sGoogle">g</li>
-					<li title="Bing" id="sBing">b</li>
-					<li title="Yandex" id="sYandex">y</li>
-					<li title="DeepL" id="sDeepL" hidden>d</li>
-					<li title="Libretranslate" id="sLibre" hidden>l</li>
-					<li style="opacity: 0; cursor: move;">O</li>
+				<ul id="serviceList">
+					<li title="Google" id="sGoogle">Google</li>
+					<li title="Bing" id="sBing">Bing</li>
+					<li title="DeepL" id="sDeepL" hidden>DeepL</li>
+					<li title="Libretranslate" id="sLibre" hidden>Libre</li>
 				</ul>
 			</div>
 		</div>
@@ -346,10 +344,11 @@ Promise.all([twpConfig.onReady(), getTabHostName()]).then(function (_) {
                         color: white;
                     }
                     li, #moreOrLess {
-                    	background-color: rgba(255, 255, 255, 0.2);
+                    	background-color: rgba(255, 255, 255, 0.12);
                     }
-                    .selected {
-                    	background-color: rgba(255, 255, 255, 0.4);
+                    .selected, .selected:hover {
+                    	background-color: #3b82f6;
+                    	color: #ffffff;
                     }
             		hr {
             			border: 1px rgba(225, 225, 225, 0.75) solid;
@@ -366,10 +365,11 @@ Promise.all([twpConfig.onReady(), getTabHostName()]).then(function (_) {
                         color: black;
                     }
                     li, #moreOrLess {
-                    	background-color: rgba(0, 0, 0, 0.2);
+                    	background-color: rgba(0, 0, 0, 0.08);
                     }
-                    .selected {
-                    	background-color: rgba(0, 0, 0, 0.4);
+                    .selected, .selected:hover {
+                    	background-color: #2563eb;
+                    	color: #ffffff;
                     }
             		hr {
             			border: 1px rgba(0, 0, 0, 0.75) solid;
@@ -393,7 +393,6 @@ Promise.all([twpConfig.onReady(), getTabHostName()]).then(function (_) {
     const eLess = shadowRoot.getElementById("less");
 
     const sGoogle = shadowRoot.getElementById("sGoogle");
-    const sYandex = shadowRoot.getElementById("sYandex");
     const sBing = shadowRoot.getElementById("sBing");
     const sDeepL = shadowRoot.getElementById("sDeepL");
     const sLibre = shadowRoot.getElementById("sLibre");
@@ -502,25 +501,11 @@ Promise.all([twpConfig.onReady(), getTabHostName()]).then(function (_) {
       translateNewInput();
 
       sGoogle.classList.remove("selected");
-      sYandex.classList.remove("selected");
       sBing.classList.remove("selected");
       sDeepL.classList.remove("selected");
       sLibre.classList.remove("selected");
 
       sGoogle.classList.add("selected");
-    };
-    sYandex.onclick = () => {
-      currentTextTranslatorService = "yandex";
-      twpConfig.set("textTranslatorService", "yandex");
-      translateNewInput();
-
-      sGoogle.classList.remove("selected");
-      sYandex.classList.remove("selected");
-      sBing.classList.remove("selected");
-      sDeepL.classList.remove("selected");
-      sLibre.classList.remove("selected");
-
-      sYandex.classList.add("selected");
     };
     sBing.onclick = () => {
       currentTextTranslatorService = "bing";
@@ -528,7 +513,6 @@ Promise.all([twpConfig.onReady(), getTabHostName()]).then(function (_) {
       translateNewInput();
 
       sGoogle.classList.remove("selected");
-      sYandex.classList.remove("selected");
       sBing.classList.remove("selected");
       sDeepL.classList.remove("selected");
       sLibre.classList.remove("selected");
@@ -536,24 +520,16 @@ Promise.all([twpConfig.onReady(), getTabHostName()]).then(function (_) {
       sBing.classList.add("selected");
     };
     sDeepL.onclick = () => {
-      if (
-        twpConfig.get("deepl_confirmed") === "yes" ||
-        confirm(twpI18n.getMessage("msgSetDeepLAlert"))
-      ) {
-        twpConfig.set("deepl_confirmed", "yes");
+      currentTextTranslatorService = "deepl";
+      twpConfig.set("textTranslatorService", "deepl");
+      translateNewInput();
 
-        currentTextTranslatorService = "deepl";
-        twpConfig.set("textTranslatorService", "deepl");
-        translateNewInput();
+      sGoogle.classList.remove("selected");
+      sBing.classList.remove("selected");
+      sDeepL.classList.remove("selected");
+      sLibre.classList.remove("selected");
 
-        sGoogle.classList.remove("selected");
-        sYandex.classList.remove("selected");
-        sBing.classList.remove("selected");
-        sDeepL.classList.remove("selected");
-        sLibre.classList.remove("selected");
-
-        sDeepL.classList.add("selected");
-      }
+      sDeepL.classList.add("selected");
     };
     sLibre.onclick = () => {
       currentTextTranslatorService = "libre";
@@ -561,7 +537,6 @@ Promise.all([twpConfig.onReady(), getTabHostName()]).then(function (_) {
       translateNewInput();
 
       sGoogle.classList.remove("selected");
-      sYandex.classList.remove("selected");
       sBing.classList.remove("selected");
       sDeepL.classList.remove("selected");
       sLibre.classList.remove("selected");
@@ -667,9 +642,7 @@ Promise.all([twpConfig.onReady(), getTabHostName()]).then(function (_) {
       );
     }
 
-    if (currentTextTranslatorService === "yandex") {
-      sYandex.classList.add("selected");
-    } else if (currentTextTranslatorService == "deepl") {
+    if (currentTextTranslatorService == "deepl") {
       sDeepL.classList.add("selected");
     } else if (currentTextTranslatorService == "bing") {
       sBing.classList.add("selected");
@@ -690,12 +663,7 @@ Promise.all([twpConfig.onReady(), getTabHostName()]).then(function (_) {
     } else {
       sBing.setAttribute("hidden", "");
     }
-    if (enabledServices.includes("yandex")) {
-      sYandex.removeAttribute("hidden");
-    } else {
-      sYandex.setAttribute("hidden", "");
-    }
-    if (enabledServices.includes("deepl")) {
+    if (twpConfig.get("customServices").find((cs) => cs.name === "deepl_freeapi")) {
       sDeepL.removeAttribute("hidden");
     } else {
       sDeepL.setAttribute("hidden", "");
@@ -737,19 +705,14 @@ Promise.all([twpConfig.onReady(), getTabHostName()]).then(function (_) {
           } else {
             sBing.setAttribute("hidden", "");
           }
-          if (enabledServices.includes("yandex")) {
-            sYandex.removeAttribute("hidden");
-          } else {
-            sYandex.setAttribute("hidden", "");
-          }
-          if (enabledServices.includes("deepl")) {
+          break;
+        }
+        case "customServices": {
+          if (newvalue.find((cs) => cs.name === "deepl_freeapi")) {
             sDeepL.removeAttribute("hidden");
           } else {
             sDeepL.setAttribute("hidden", "");
           }
-          break;
-        }
-        case "customServices": {
           if (newvalue.find((cs) => cs.name === "libre")) {
             sLibre.removeAttribute("hidden");
           } else {
