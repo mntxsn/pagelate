@@ -1,30 +1,26 @@
 {
-  "name": "translate-web-pages",
+  "name": "pagelate",
   "version": "1.0.0",
-  "browserslist": [
-    "firefox 63",
-    "chrome 70"
-  ],
+  "description": "Browser extension that translates whole web pages and selected text using Google or Bing. Fork of TWP - Translate Web Pages.",
+  "homepage": "https://github.com/mntxsn/pagelate",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mntxsn/pagelate.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mntxsn/pagelate/issues"
+  },
+  "license": "MPL-2.0",
   "scripts": {
     "build": "npx gulp",
-    "build:local-sourcemaps": "npx gulp --local-sourcemaps",
-    "build:sign": "npx gulp --sign",
-    "polyfill": "npx webpack --entry=./polyfill.js --output-path=./src/lib --output-filename=polyfill.js -d inline-source-map"
-  },
-  "dependencies": {
-    "core-js": "^3.26.1"
+    "build:sign": "npx gulp --sign"
   },
   "devDependencies": {
-    "@babel/preset-env": "^7.20.2",
     "@types/chrome": "^0.0.203",
     "@types/firefox-webext-browser": "^94.0.1",
     "crx3": "^1.1.3",
     "gulp": "^5.0.0",
-    "gulp-babel": "^8.0.0",
-    "gulp-sourcemaps": "^3.0.0",
     "gulp-zip": "^5.1.0",
-    "node-file-dialog": "^1.0.3",
-    "webpack": "^5.105.0",
-    "webpack-cli": "^5.0.2"
+    "node-file-dialog": "^1.0.3"
   }
 }
