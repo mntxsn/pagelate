@@ -520,7 +520,7 @@ const translationCache = (function () {
      * Get the name of all translation caches.
      * @example
      * #getAllDBNames()
-     * // returns ["google@de.en", "google@zh-CN.es", "yandex@ru.pt"]
+     * // returns ["google@de.en", "google@zh-CN.es", "bing@ru.pt"]
      * @returns {Promise<string[]>}
      */
     async #getAllDBNames() {
@@ -686,7 +686,6 @@ const translationCache = (function () {
       // Deletes old translation cache.
       if (indexedDB && indexedDB.deleteDatabase) {
         indexedDB.deleteDatabase("googleCache");
-        indexedDB.deleteDatabase("yandexCache");
         indexedDB.deleteDatabase("bingCache");
       }
       // Delete the new translation cache.

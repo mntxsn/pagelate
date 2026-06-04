@@ -49,6 +49,113 @@ const translationService = (function () {
         .replace(/\&quot;/g, '"')
         .replace(/\&\#39;/g, "'");
     }
+
+    /**
+     * Decode the HTML entities that the translation services may return.
+     * Used by {@link Utils.parseHtmlFragmentNodes} as a DOM-free substitute for
+     * the entity decoding that `DOMParser`/`textContent` would perform.
+     * Covers the entities produced by {@link Utils.escapeHTML} plus the most
+     * common named entities and numeric (decimal/hex) references.
+     * @param {string} str
+     * @returns {string}
+     */
+    static decodeEntities(str) {
+      if (str.indexOf("&") === -1) return str;
+      return str
+        .replace(/&lt;/g, "<")
+        .replace(/&gt;/g, ">")
+        .replace(/&quot;/g, '"')
+        .replace(/&#0*39;/g, "'")
+        .replace(/&apos;/g, "'")
+        .replace(/&nbsp;/g, " ")
+        .replace(/&#(\d+);/g, (_, d) => {
+          try {
+            return String.fromCodePoint(parseInt(d, 10));
+          } catch {
+            return _;
+          }
+        })
+        .replace(/&#x([0-9a-fA-F]+);/g, (_, h) => {
+          try {
+            return String.fromCodePoint(parseInt(h, 16));
+          } catch {
+            return _;
+          }
+        })
+        .replace(/&amp;/g, "&"); // must be last to avoid double-decoding
+    }
+
+    /**
+     * DOM-free replacement for parsing a translation response fragment when
+     * `DOMParser` is unavailable (e.g. inside a Manifest V3 service worker).
+     *
+     * Returns the top-level nodes of the fragment in document order, mirroring
+     * `DOMParser(...).body.childNodes`: each node is `{ isText, nodeName,
+     * textContent }`, with `textContent` already entity-decoded and inner tags
+     * stripped (like DOM `textContent`). Element `nodeName` is upper-cased to
+     * match the DOM (`<b10>` -> `"B10"`).
+     *
+     * Tailored to the simple `<bN>...</bN>` / `<iN>...</iN>` tag shape used by the
+     * translation services; it is not a general-purpose HTML parser.
+     * @param {string} html
+     * @returns {{ isText: boolean, nodeName: string, textContent: string }[]}
+     */
+    static parseHtmlFragmentNodes(html) {
+      const nodes = [];
+      let i = 0;
+      const n = html.length;
+      while (i < n) {
+        if (html[i] === "<" && i + 1 < n && html[i + 1] !== "/") {
+          const close = html.indexOf(">", i);
+          if (close === -1) {
+            nodes.push({
+              isText: true,
+              nodeName: "#text",
+              textContent: Utils.decodeEntities(html.slice(i)),
+            });
+            break;
+          }
+          const tagName = html.slice(i + 1, close).split(/[\s/]/)[0];
+          if (!tagName) {
+            const next = html.indexOf("<", i + 1);
+            const end = next === -1 ? n : next;
+            nodes.push({
+              isText: true,
+              nodeName: "#text",
+              textContent: Utils.decodeEntities(html.slice(i, end)),
+            });
+            i = end;
+            continue;
+          }
+          const closeTag = "</" + tagName + ">";
+          const closeIdx = html.indexOf(closeTag, close + 1);
+          let inner, nextI;
+          if (closeIdx === -1) {
+            inner = html.slice(close + 1);
+            nextI = n;
+          } else {
+            inner = html.slice(close + 1, closeIdx);
+            nextI = closeIdx + closeTag.length;
+          }
+          nodes.push({
+            isText: false,
+            nodeName: tagName.toUpperCase(),
+            textContent: Utils.decodeEntities(inner.replace(/<[^>]*>/g, "")),
+          });
+          i = nextI;
+        } else {
+          const next = html.indexOf("<", html[i] === "<" ? i + 1 : i);
+          const end = next === -1 ? n : next;
+          nodes.push({
+            isText: true,
+            nodeName: "#text",
+            textContent: Utils.decodeEntities(html.slice(i, end)),
+          });
+          i = end;
+        }
+      }
+      return nodes;
+    }
   }
 
   class GoogleHelper {
@@ -212,39 +319,34 @@ const translationService = (function () {
             ])
           );
 
-          const http = new XMLHttpRequest();
-          http.open(
-            "GET",
+          fetch(
             "https://translate.googleapis.com/_/translate_http/_/js/k=translate_http.tr.en_US.YusFYy3P_ro.O/am=AAg/d=1/exm=el_conf/ed=1/rs=AN8SPfq1Hb8iJRleQqQc8zhdzXmF9E56eQ/m=el_main"
-          );
-          http.send();
-          http.onload = (e) => {
-            if (http.responseText && http.responseText.length > 1) {
-              const result = http.responseText.match(
-                /['"]x\-goog\-api\-key['"]\s*\:\s*['"](\w{39})['"]/i
-              );
-              console.log(result);
-              if (result && result.length === 2) {
-                GoogleHelper_v2.#translateAuth = result[1];
-                GoogleHelper_v2.#AuthNotFound = false;
+          )
+            .then((response) => response.text())
+            .then((responseText) => {
+              if (responseText && responseText.length > 1) {
+                const result = responseText.match(
+                  /['"]x\-goog\-api\-key['"]\s*\:\s*['"](\w{39})['"]/i
+                );
+                console.log(result);
+                if (result && result.length === 2) {
+                  GoogleHelper_v2.#translateAuth = result[1];
+                  GoogleHelper_v2.#AuthNotFound = false;
+                } else {
+                  GoogleHelper_v2.#AuthNotFound = true;
+                  GoogleHelper_v2.#translateAuth = alternativeKey;
+                }
               } else {
                 GoogleHelper_v2.#AuthNotFound = true;
                 GoogleHelper_v2.#translateAuth = alternativeKey;
               }
-            } else {
-              GoogleHelper_v2.#AuthNotFound = true;
+              resolve();
+            })
+            .catch((e) => {
+              console.error(e);
               GoogleHelper_v2.#translateAuth = alternativeKey;
-            }
-            resolve();
-          };
-          http.onerror =
-            http.onabort =
-            http.ontimeout =
-              (e) => {
-                console.error(e);
-                GoogleHelper_v2.#translateAuth = alternativeKey;
-                resolve();
-              };
+              resolve();
+            });
         } else {
           resolve();
         }
@@ -255,83 +357,6 @@ const translationService = (function () {
       });
 
       return await GoogleHelper_v2.#authPromise;
-    }
-  }
-
-  class YandexHelper {
-    /** @type {number} */
-    static #lastRequestSidTime = null;
-    /** @type {string} */
-    static #translateSid = null;
-    /** @type {boolean} */
-    static #SIDNotFound = false;
-    /** @type {Promise<void>} */
-    static #findPromise = null;
-
-    static get translateSid() {
-      return YandexHelper.#translateSid;
-    }
-
-    /**
-     * Find the SID of Yandex Translator. The SID value is used in translation requests.
-     * @returns {Promise<void>}
-     */
-    static async findSID() {
-      if (YandexHelper.#findPromise) return await YandexHelper.#findPromise;
-      YandexHelper.#findPromise = new Promise((resolve) => {
-        let updateYandexSid = false;
-        if (YandexHelper.#lastRequestSidTime) {
-          const date = new Date();
-          if (YandexHelper.#translateSid) {
-            date.setMinutes(date.getMinutes() - 20);
-          } else if (YandexHelper.#SIDNotFound) {
-            date.setMinutes(date.getMinutes() - 5);
-          } else {
-            date.setMinutes(date.getMinutes() - 1);
-          }
-          if (date.getTime() > YandexHelper.#lastRequestSidTime) {
-            updateYandexSid = true;
-          }
-        } else {
-          updateYandexSid = true;
-        }
-
-        if (updateYandexSid) {
-          YandexHelper.#lastRequestSidTime = Date.now();
-
-          const http = new XMLHttpRequest();
-          http.open(
-            "GET",
-            "https://translate.yandex.net/website-widget/v1/widget.js?widgetId=ytWidget&pageLang=es&widgetTheme=light&autoMode=false"
-          );
-          http.send();
-          http.onload = (e) => {
-            const result = http.responseText.match(/sid\:\s\'[0-9a-f\.]+/);
-            if (result && result[0] && result[0].length > 7) {
-              YandexHelper.#translateSid = result[0].substring(6);
-              YandexHelper.#SIDNotFound = false;
-            } else {
-              YandexHelper.#SIDNotFound = true;
-            }
-            resolve();
-          };
-          http.onerror =
-            http.onabort =
-            http.ontimeout =
-              (e) => {
-                console.error(e);
-                resolve();
-              };
-        } else {
-          resolve();
-        }
-      });
-
-      YandexHelper.#findPromise.finally(() => {
-        YandexHelper.#findPromise = null;
-      });
-
-      return await YandexHelper.#findPromise;
     }
   }
 
@@ -377,25 +402,21 @@ const translationService = (function () {
         if (updateBingAuth) {
           BingHelper.#lastRequestAuthTime = Date.now();
 
-          const http = new XMLHttpRequest();
-          http.open("GET", "https://edge.microsoft.com/translate/auth");
-          http.send();
-          http.onload = (e) => {
-            if (http.responseText && http.responseText.length > 1) {
-              BingHelper.#translateAuth = http.responseText;
-              BingHelper.#AuthNotFound = false;
-            } else {
-              BingHelper.#AuthNotFound = true;
-            }
-            resolve();
-          };
-          http.onerror =
-            http.onabort =
-            http.ontimeout =
-              (e) => {
-                console.error(e);
-                resolve();
-              };
+          fetch("https://edge.microsoft.com/translate/auth")
+            .then((response) => response.text())
+            .then((responseText) => {
+              if (responseText && responseText.length > 1) {
+                BingHelper.#translateAuth = responseText;
+                BingHelper.#AuthNotFound = false;
+              } else {
+                BingHelper.#AuthNotFound = true;
+              }
+              resolve();
+            })
+            .catch((e) => {
+              console.error(e);
+              resolve();
+            });
         } else {
           resolve();
         }
@@ -503,7 +524,7 @@ const translationService = (function () {
        * @type {Map<string, TranslationInfo>}
        *
        * It works as an in-memory translation cache.
-       * Ensures that two identical requests share the same `XMLHttpRequest`.
+       * Ensures that two identical requests share the same in-flight request.
        * */
       this.translationsInProgress = new Map();
     }
@@ -616,54 +637,40 @@ const translationService = (function () {
     }
 
     /**
-     * Makes a request using the *XMLHttpRequest* API. Returns a promise that will be resolved with the result of the request. If the request fails, the promise will be rejected.
+     * Makes a request using the *fetch* API. Returns a promise that will be resolved with the result of the request. If the request fails, the promise will be rejected.
      * @param {string} sourceLanguage
      * @param {string} targetLanguage
      * @param {Array<TranslationInfo>} requests
      * @returns {Promise<*>}
      */
     async makeRequest(sourceLanguage, targetLanguage, requests) {
-      return await new Promise((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-        xhr.open(
-          this.xhrMethod,
-          this.baseURL +
-            (this.cbGetExtraParameters
-              ? this.cbGetExtraParameters(
-                  sourceLanguage,
-                  targetLanguage,
-                  requests
-                )
-              : "")
-        );
+      const url =
+        this.baseURL +
+        (this.cbGetExtraParameters
+          ? this.cbGetExtraParameters(sourceLanguage, targetLanguage, requests)
+          : "");
 
-        if (this.cbGetExtraHeaders) {
-          const headers = this.cbGetExtraHeaders();
-          headers.forEach((header) => {
-            xhr.setRequestHeader(header.name, header.value);
-          });
-        }
+      const headers = {};
+      if (this.cbGetExtraHeaders) {
+        this.cbGetExtraHeaders().forEach((header) => {
+          headers[header.name] = header.value;
+        });
+      }
 
-        xhr.responseType = "json";
+      const body = this.cbGetRequestBody
+        ? this.cbGetRequestBody(sourceLanguage, targetLanguage, requests)
+        : undefined;
 
-        xhr.onload = (event) => {
-          resolve(xhr.response);
-        };
-
-        xhr.onerror =
-          xhr.onabort =
-          xhr.ontimeout =
-            (event) => {
-              console.error(event);
-              reject();
-            };
-
-        xhr.send(
-          this.cbGetRequestBody
-            ? this.cbGetRequestBody(sourceLanguage, targetLanguage, requests)
-            : undefined
-        );
+      // Default credentials ("same-origin") match the previous XMLHttpRequest
+      // behavior, which did not set withCredentials (i.e. sent no cross-origin cookies).
+      const response = await fetch(url, {
+        method: this.xhrMethod,
+        headers,
+        body,
       });
+
+      // XHR used responseType "json"; mirror that (and resolve like onload did).
+      return await response.json();
     }
 
     /**
@@ -1012,110 +1019,6 @@ const translationService = (function () {
     }
   })();
 
-  const yandexService = new (class extends Service {
-    constructor() {
-      super(
-        "yandex",
-        "https://translate.yandex.net/api/v1/tr.json/translate?srv=tr-url-widget",
-        "GET",
-        function cbTransformRequest(sourceArray) {
-          return sourceArray
-            .map((value) => Utils.escapeHTML(value))
-            .join("<wbr>");
-        },
-        function cbParseResponse(response) {
-          const lang = response.lang;
-          const detectedLanguage = lang ? lang.split("-")[0] : null;
-          return response.text.map(
-            /** @return {Service_Single_Result_Response} */ (
-              /** @type {string} */ text
-            ) => ({ text, detectedLanguage })
-          );
-        },
-        function cbTransformResponse(result, dontSortResults) {
-          return result
-            .split("<wbr>")
-            .map((value) => Utils.unescapeHTML(value));
-        },
-        function cbGetExtraParameters(
-          sourceLanguage,
-          targetLanguage,
-          requests
-        ) {
-          return `&id=${YandexHelper.translateSid}-0-0&format=html&lang=${
-            sourceLanguage === "auto" ? "" : sourceLanguage + "-"
-          }${targetLanguage}${requests
-            .map((info) => `&text=${encodeURIComponent(info.originalText)}`)
-            .join("")}`;
-        },
-        function cbGetRequestBody(sourceLanguage, targetLanguage, requests) {
-          return undefined;
-        },
-        function cbGetExtraHeaders() {
-          return [
-            {
-              name: "Content-Type",
-              value: "application/x-www-form-urlencoded",
-            },
-          ];
-        }
-      );
-    }
-
-    /**
-     * @param {boolean} dontSortResults This parameter is not needed in this translation service
-     */
-    async translate(
-      sourceLanguage,
-      targetLanguage,
-      sourceArray2d,
-      dontSaveInPersistentCache,
-      dontSortResults = false
-    ) {
-      await YandexHelper.findSID();
-      if (!YandexHelper.translateSid) return;
-      /** @type {{search: string, replace: string}[]} */
-      const replacements = [
-        {
-          search: "zh-CN",
-          replace: "zh",
-        },
-        {
-          search: "zh-TW",
-          replace: "zh",
-        },
-        {
-          search: "fr-CA",
-          replace: "fr",
-        },
-        {
-          search: "pt",
-          replace: "pt-BR",
-        },
-        {
-          search: "pt-PT",
-          replace: "pt",
-        },
-      ];
-      replacements.forEach((r) => {
-        if (targetLanguage === r.search) {
-          targetLanguage = r.replace;
-        }
-        if (sourceLanguage === r.search) {
-          sourceLanguage = r.replace;
-        }
-      });
-
-      return await super.translate(
-        sourceLanguage,
-        targetLanguage,
-        sourceArray2d,
-        dontSaveInPersistentCache,
-        dontSortResults
-      );
-    }
-  })();
-
   const bingService = new (class extends Service {
     constructor() {
       super(
@@ -1143,20 +1046,32 @@ const translationService = (function () {
         },
         function cbTransformResponse(result, dontSortResults) {
           const resultArray = [];
-
-          const parser = new DOMParser();
-          const doc = parser.parseFromString(result, "text/html");
           let currText = "";
-          doc.body.childNodes.forEach((node) => {
+
+          // Use DOMParser where available (e.g. a Firefox background event page);
+          // fall back to a DOM-free parser in a service worker (Chrome MV3).
+          let nodes;
+          if (typeof DOMParser !== "undefined") {
+            const doc = new DOMParser().parseFromString(result, "text/html");
+            nodes = Array.from(doc.body.childNodes).map((node) => ({
+              isText: node.nodeName === "#text",
+              nodeName: node.nodeName,
+              textContent: node.textContent,
+            }));
+          } else {
+            nodes = Utils.parseHtmlFragmentNodes(result);
+          }
+
+          nodes.forEach((node) => {
             if (dontSortResults) {
-              if (node.nodeName == "#text") {
+              if (node.isText) {
                 currText += node.textContent;
               } else {
                 resultArray.push(currText + node.textContent);
                 currText = "";
               }
             } else {
-              if (node.nodeName == "#text") {
+              if (node.isText) {
                 currText += node.textContent;
               } else {
                 const id = parseInt(node.nodeName.slice(1)) - 10;
@@ -1283,100 +1198,6 @@ const translationService = (function () {
     }
   })();
 
-  const deeplService = new (class {
-    constructor() {
-      this.DeepLTab = null;
-    }
-    /**
-     *
-     * @param {string} sourceLanguage - This parameter is not used
-     * @param {*} targetLanguage
-     * @param {*} sourceArray2d - Only the string `sourceArray2d[0][0]` will be translated.
-     * @param {*} dontSaveInPersistentCache - This parameter is not used
-     * @param {*} dontSortResults - This parameter is not used
-     * @returns
-     */
-    async translate(
-      sourceLanguage,
-      targetLanguage,
-      sourceArray2d,
-      dontSaveInPersistentCache,
-      dontSortResults = false
-    ) {
-      if (targetLanguage === "pt") {
-        targetLanguage = "pt-BR";
-      } else if (targetLanguage === "no") {
-        targetLanguage = "nb";
-      } else if (targetLanguage == "zh-CN") {
-        targetLanguage = "zh-Hans";
-      } else if (targetLanguage == "zh-TW") {
-        targetLanguage = "zh";
-      }
-
-      return await new Promise((resolve) => {
-        const waitFirstTranslationResult = () => {
-          const listener = (request, sender, sendResponse) => {
-            if (request.action === "DeepL_firstTranslationResult") {
-              resolve([[request.result]]);
-              chrome.runtime.onMessage.removeListener(listener);
-            }
-          };
-          chrome.runtime.onMessage.addListener(listener);
-
-          setTimeout(() => {
-            chrome.runtime.onMessage.removeListener(listener);
-            resolve([[""]]);
-          }, 8000);
-        };
-
-        if (this.DeepLTab) {
-          chrome.tabs.get(this.DeepLTab.id, (tab) => {
-            checkedLastError();
-            if (tab) {
-              //chrome.tabs.update(tab.id, {active: true})
-              chrome.tabs.sendMessage(
-                tab.id,
-                {
-                  action: "translateTextWithDeepL",
-                  text: sourceArray2d[0][0],
-                  targetLanguage,
-                },
-                {
-                  frameId: 0,
-                },
-                (response) => {
-                  checkedLastError();
-                  resolve([[response]]);
-                }
-              );
-            } else {
-              tabsCreate(
-                `https://www.deepl.com/#!${targetLanguage}!#${encodeURIComponent(
-                  sourceArray2d[0][0]
-                )}`,
-                (tab) => {
-                  this.DeepLTab = tab;
-                  waitFirstTranslationResult();
-                }
-              );
-              // resolve([[""]])
-            }
-          });
-        } else {
-          tabsCreate(
-            `https://www.deepl.com/#!${targetLanguage}!#${encodeURIComponent(
-              sourceArray2d[0][0]
-            )}`,
-            (tab) => {
-              this.DeepLTab = tab;
-              waitFirstTranslationResult();
-            }
-          );
-          // resolve([[""]])
-        }
-      });
-    }
-  })();
 
   /**
    * Creates the libreTranslate translation service from URL and apiKey
@@ -1535,12 +1356,9 @@ const translationService = (function () {
   const serviceList = new Map();
 
   serviceList.set("google", googleService);
-  serviceList.set("yandex", yandexService);
   serviceList.set("bing", bingService);
-  serviceList.set(
-    "deepl",
-    /** @type {Service} */ /** @type {?} */ (deeplService)
-  );
+  // DeepL is registered on demand once a Free API key is configured
+  // (see the twpConfig.onReady block and createDeeplFreeApiService below).
 
   /**
    * Get translation service from your name
@@ -1705,10 +1523,7 @@ const translationService = (function () {
         createDeeplFreeApiService(request.deepl_freeapi.apiKey)
       );
     } else if (request.action === "removeDeeplFreeApiService") {
-      serviceList.set(
-        "deepl",
-        /** @type {Service} */ /** @type {?} */ (deeplService)
-      );
+      serviceList.delete("deepl");
     }
   });
 
