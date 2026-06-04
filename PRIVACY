@@ -1,6 +1,6 @@
-TWP - Translate Web Pages does not collect any data.
+Pagelate - Translate Web Pages does not collect any data.
 
 The translation will be done using third party services and they may collect some data to improve their services.
-The extension currently uses translation services from Google, Microsoft, Yandex and DeepL. It also uses Google and Microsoft to provide text to speech.
+The extension uses translation services from Google and Microsoft (and DeepL for text translation). It also uses Google and Microsoft to provide text to speech.
 
-The source code is available on [Github](https://github.com/FilipePS/Traduzir-paginas-web).
+The source code is available on [Github](https://github.com/mntxsn/pagelate).
