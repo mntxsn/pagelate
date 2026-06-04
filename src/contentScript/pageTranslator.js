@@ -22,7 +22,7 @@ let compressionMap;
  * ## custom dictionary functional preprocessing
  *
  * ### How to achieve:
- * 1. For Google and Yandex, this feature is not officially supported,
+ * 1. For Google, this feature is not officially supported,
  *    we convert matching keywords to a string of special signs to skip translation,
  *    before sending to the translation engine,
  *    and after the results come back, call `handleCustomWords` to restore the words.

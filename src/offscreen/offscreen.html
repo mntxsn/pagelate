@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Pagelate offscreen</title>
+  </head>
+  <body>
+    <!--
+      Chrome MV3 offscreen document. Hosts the DOM-dependent features that a
+      service worker cannot run: text-to-speech audio playback (Audio/AudioContext)
+      and OS color-scheme detection (matchMedia). Firefox uses its background event
+      page instead and does not load this document.
+    -->
+    <script src="/lib/checkedLastError.js"></script>
+    <script src="/lib/stuff.js"></script>
+    <script src="/lib/languages.js"></script>
+    <script src="/lib/config.js"></script>
+    <script src="/lib/platformInfo.js"></script>
+    <script src="/lib/i18n.js"></script>
+    <script src="/background/textToSpeech.js"></script>
+  </body>
+</html>

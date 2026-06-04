@@ -60,16 +60,14 @@ const textToSpeech = (function () {
         if (updateBingAuth) {
           BingHelper.#lastRequestTime = Date.now();
 
-          const http = new XMLHttpRequest();
-          http.open("GET", "https://www.bing.com/translator");
-          http.send();
-          http.onload = (e) => {
+          fetch("https://www.bing.com/translator")
+            .then((response) => response.text())
+            .then((responseText) => {
             try {
-              if (!(http.responseText && http.responseText.length > 1)) {
+              if (!(responseText && responseText.length > 1)) {
                 throw new Error("Not found");
               }
 
-              const responseText = http.responseText;
               const IG = responseText.match(/IG:"([^"]+)"/)[1];
               const IID = responseText.match(/data\-iid\="([^"]+)"/)[1];
 
@@ -100,14 +98,11 @@ const textToSpeech = (function () {
             } finally {
               resolve();
             }
-          };
-          http.onerror =
-            http.onabort =
-            http.ontimeout =
-              (e) => {
-                console.error(e);
-                resolve();
-              };
+            })
+            .catch((e) => {
+              console.error(e);
+              resolve();
+            });
         } else {
           resolve();
         }
@@ -248,7 +243,7 @@ const textToSpeech = (function () {
     constructor() {
       /** @type {MediaElementAudioSourceNode[]} */
       this.sources = [];
-      if ("AudioContext" in window) {
+      if (typeof AudioContext !== "undefined") {
         this.audioCtx = new AudioContext();
         this.audioCtx.suspend();
         this.gainNode = this.audioCtx.createGain();

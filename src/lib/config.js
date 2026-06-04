@@ -10,10 +10,10 @@ const twpConfig = (function () {
    */
   const defaultConfig = {
     uiLanguage: "default",
-    pageTranslatorService: "google", // google yandex bing
-    textTranslatorService: "google", // google yandex bing deepl
+    pageTranslatorService: "google", // google bing
+    textTranslatorService: "google", // google bing deepl
     textToSpeechService: "google", // google bing
-    enabledServices: ["google", "bing", "yandex", "deepl"],
+    enabledServices: ["google", "bing"],
     ttsSpeed: 1.0,
     ttsVolume: 1.0,
     targetLanguage: null,
@@ -36,7 +36,6 @@ const twpConfig = (function () {
     darkMode: "auto", // auto yes no
     popupBlueWhenSiteIsTranslated: "yes",
     popupPanelSection: 1,
-    showReleaseNotes: "yes",
     dontShowIfIsNotValidText: "yes",
     dontShowIfPageLangIsTargetLang: "no",
     dontShowIfPageLangIsUnknown: "no",
@@ -62,6 +61,17 @@ const twpConfig = (function () {
     proxyServers: {},
   };
   const config = structuredClone(defaultConfig);
+
+  // Whether this context can touch chrome.storage directly. The Chrome MV3
+  // offscreen document only gets chrome.runtime, so chrome.storage/chrome.i18n
+  // are undefined there; in that case we proxy config through the service
+  // worker via runtime messaging instead of crashing.
+  const hasStorageAccess = !!(
+    typeof chrome !== "undefined" &&
+    chrome.storage &&
+    chrome.storage.local &&
+    chrome.storage.onChanged
+  );
 
   let onReadyObservers = [];
   let configIsReady = false;
@@ -122,7 +132,14 @@ const twpConfig = (function () {
     config[name] = value;
     const obj = {};
     obj[name] = toObjectOrArrayIfTypeIsMapOrSet(value);
-    chrome.storage.local.set(obj);
+    if (hasStorageAccess) {
+      chrome.storage.local.set(obj);
+    } else {
+      // No direct storage access (offscreen document): let the service worker
+      // persist it. Its own storage.onChanged broadcast keeps every context
+      // (including this one) in sync afterwards.
+      chrome.runtime.sendMessage({ action: "twpConfigSet", changes: obj });
+    }
     observers.forEach((callback) => callback(name, value));
   };
 
@@ -162,7 +179,10 @@ const twpConfig = (function () {
 
     if (
       typeof browser !== "undefined" &&
-      typeof browser.commands !== "undefined"
+      typeof browser.commands !== "undefined" &&
+      // commands.update is Firefox-only; recent Chrome exposes a `browser`
+      // alias with chrome.commands (which has no update()), so guard the method.
+      typeof browser.commands.update === "function"
     ) {
       for (const name in config.hotkeys) {
         browser.commands.update({
@@ -182,7 +202,10 @@ const twpConfig = (function () {
     // try to reset the keyboard shortcuts
     if (
       typeof browser !== "undefined" &&
-      typeof browser.commands !== "undefined"
+      typeof browser.commands !== "undefined" &&
+      // commands.update is Firefox-only; recent Chrome exposes a `browser`
+      // alias with chrome.commands (which has no update()), so guard the method.
+      typeof browser.commands.update === "function"
     ) {
       for (const name of Object.keys(
         chrome.runtime.getManifest().commands || {}
@@ -213,23 +236,46 @@ const twpConfig = (function () {
     observers.push(callback);
   };
 
-  // listen to storage changes
-  chrome.storage.onChanged.addListener((changes, areaName) => {
-    twpConfig.onReady(function () {
-      if (areaName === "local") {
-        for (const name in changes) {
-          const newValue = changes[name].newValue;
-          if (config[name] !== newValue) {
-            config[name] = fixObjectType(name, newValue);
-            observers.forEach((callback) => callback(name, newValue));
-          }
+  /**
+   * apply a batch of storage changes to the in-memory config and notify observers
+   * @param {Object} changes - shape: { [name]: { newValue } }
+   */
+  function applyStorageChanges(changes) {
+    for (const name in changes) {
+      const newValue = changes[name].newValue;
+      if (config[name] !== newValue) {
+        config[name] = fixObjectType(name, newValue);
+        observers.forEach((callback) => callback(name, newValue));
+      }
+    }
+  }
+
+  // React to config changes. Where chrome.storage is available we listen to it
+  // directly; in the offscreen document (no chrome.storage) we instead receive
+  // change broadcasts relayed by the service worker.
+  if (hasStorageAccess) {
+    chrome.storage.onChanged.addListener((changes, areaName) => {
+      twpConfig.onReady(function () {
+        if (areaName === "local") {
+          applyStorageChanges(changes);
         }
+      });
+    });
+  } else {
+    chrome.runtime.onMessage.addListener((request) => {
+      if (request && request.action === "twpConfigChanged" && request.changes) {
+        twpConfig.onReady(function () {
+          applyStorageChanges(request.changes);
+        });
       }
     });
-  });
+  }
 
-  // load config
-  chrome.i18n.getAcceptLanguages((acceptedLanguages) => {
+  // load config. Where chrome.storage is available we read it directly and
+  // resolve the default target languages. In the offscreen document we instead
+  // fetch the already-resolved config from the service worker (see else branch).
+  if (hasStorageAccess) {
+    chrome.i18n.getAcceptLanguages((acceptedLanguages) => {
     chrome.storage.local.get(null, (onGot) => {
       // load config; convert object/array to map/set if necessary
       for (const name in onGot) {
@@ -347,7 +393,27 @@ const twpConfig = (function () {
         readyConfig();
       }
     });
-  });
+    });
+  } else {
+    // Offscreen document (no chrome.storage): ask the service worker, which
+    // owns storage, for the fully-resolved config. The response is the JSON
+    // produced by twpConfig.export() in the worker.
+    chrome.runtime.sendMessage({ action: "twpGetConfig" }, (response) => {
+      if (response) {
+        try {
+          const got = JSON.parse(response);
+          for (const name in got) {
+            if (name in defaultConfig) {
+              config[name] = fixObjectType(name, got[name]);
+            }
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      }
+      readyConfig();
+    });
+  }
 
   function addInArray(configName, value) {
     const array = twpConfig.get(configName);
@@ -553,7 +619,7 @@ const twpConfig = (function () {
    * @returns {string} newServiceName
    */
   twpConfig.swapPageTranslationService = function () {
-    const pageTranslationServices = ["google", "bing", "yandex"];
+    const pageTranslationServices = ["google", "bing"];
     const pageEnabledServices = twpConfig
       .get("enabledServices")
       .filter((svName) => pageTranslationServices.includes(svName));
