@@ -4,8 +4,7 @@ body {
 }
 
 .list {
-  overflow: auto;
-  max-height: 250px;
+  /* grow with content (no inner scrollbar) */
 }
 
 #addToNeverTranslateLangs,

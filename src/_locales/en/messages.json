@@ -1,6 +1,27 @@
 {
   "extensionDescription": {
-    "message": "Translate your page in real time using Google or Yandex."
+    "message": "Translate web pages and selected text in real time using Google or Bing."
+  },
+  "lblServices": {
+    "message": "Services"
+  },
+  "lblPageBehavior": {
+    "message": "Page behavior"
+  },
+  "lblTextToSpeech": {
+    "message": "Text-to-speech"
+  },
+  "descPageTranslatorService": {
+    "message": "Engine used to translate whole web pages."
+  },
+  "descTextTranslatorService": {
+    "message": "Engine used to translate selected text and the popup."
+  },
+  "descTranslateDynamicallyCreatedContent": {
+    "message": "Re-translate content added after load (infinite scroll, live updates)."
+  },
+  "descDontSortResults": {
+    "message": "Slightly faster, but segment order may be less accurate."
   },
   "pageActionTitle": {
     "message": "Translate this page"
@@ -73,9 +94,6 @@
   },
   "optionPopupThreeFingers": {
     "message": "When I touch three fingers on the screen"
-  },
-  "msgOpenOnYandexTranslator": {
-    "message": "Open in Yandex Translate"
   },
   "lblOthers": {
     "message": "Others"
@@ -183,7 +201,7 @@
     "message": "Show translated text when hovering on these sites"
   },
   "popupBlueWhenSiteIsTranslated": {
-    "message": "Make the pop-up icon blue when the site is translated"
+    "message": "Highlight the icon when the site is translated"
   },
   "more": {
     "message": "More"
@@ -266,6 +284,18 @@
   "lblPersonalSettings": {
     "message": "Personal settings"
   },
+  "lblBackupRestore": {
+    "message": "Backup & restore"
+  },
+  "descBackupRestore": {
+    "message": "Save all your settings to a file or restore them on another device."
+  },
+  "lblDangerZone": {
+    "message": "Danger zone"
+  },
+  "descResetToDefault": {
+    "message": "Resets all settings to their defaults. This cannot be undone."
+  },
   "backupToFile": {
     "message": "Backup to file"
   },
@@ -335,7 +365,10 @@
     "message": "Donate With PayPal"
   },
   "lblAutoTranslateWhenClickingALink": {
-    "message": "Automatically translate when clicking on a link that takes you to the same domain as the current site"
+    "message": "Auto-translate links to the same site"
+  },
+  "descAutoTranslateWhenClickingALink": {
+    "message": "When you click a link to the same domain, the new page is translated automatically."
   },
   "openNativeShortcutManager": {
     "message": "Open native shortcut key manager"
@@ -360,7 +393,10 @@
     }
   },
   "translateClickingOnce": {
-    "message": "Translate the page by clicking once on the button in the address bar. (To see the popup, right-click)"
+    "message": "Translate with a single click on the address-bar button"
+  },
+  "descTranslateClickingOnce": {
+    "message": "Right-click the button to open the popup instead."
   },
   "btnShowPopup": {
     "message": "Show popup"
@@ -426,7 +462,10 @@
     "message": "Replace selected text with translated text instantly"
   },
   "optionsAddToCustomDictionary": {
-    "message": "Add to custom dictionary (This allows you to skip certain words during web page translation)"
+    "message": "Custom dictionary"
+  },
+  "descCustomDictionary": {
+    "message": "Words added here are skipped during page translation."
   },
   "msgSelectTargetLanguage": {
     "message": "Translate websites into this target language"
@@ -502,7 +541,10 @@
     "message": "I have been developing, updating and supporting this extension for over five years. It is amazing to see that we have over 600,000 daily users.\n\nI would be grateful if you could help me financially via Paypal or by becoming a member of my Patreon, your contribution helps me to continue bringing improvements to this extension.\n\nThank you to everyone who has already contributed to this project."
   },
   "lblEnableDiskCache": {
-    "message": "Enable persistent translation cache (on-disk cache)"
+    "message": "Save translations to disk"
+  },
+  "descEnableDiskCache": {
+    "message": "Keeps translations after restarting the browser — faster re-translation and fewer requests to the translation service."
   },
   "selectOriginalLanguage": {
     "message": "Select the original website language"
@@ -511,7 +553,7 @@
     "message": "Select target language"
   },
   "msgImproveTranslation": {
-    "message": "Improve translation"
+    "message": "Translation options"
   },
   "lblExperimental": {
     "message": "Experimental"
@@ -523,16 +565,16 @@
     "message": "Select the translation services you want to use"
   },
   "useAlternativeService": {
-    "message": "Silently use an alternate translation service if the current target language is not supported by the selected translation service"
+    "message": "Use a fallback translation service"
+  },
+  "descUseAlternativeService": {
+    "message": "Used when the chosen service doesn't support the target language."
   },
   "msgDefaultLanguage": {
     "message": "Default language"
   },
   "msgExtUILanguage": {
     "message": "Extension user interface language"
-  },
-  "msgSetDeepLAlert": {
-    "message": "Are you sure you want to set the translation service to DeepL?\nA new tab will open, and the translation will take place there."
   },
   "lblTextToSpeechService": {
     "message": "Text-to-speech service"

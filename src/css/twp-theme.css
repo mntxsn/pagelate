@@ -1,0 +1,621 @@
+/*
+ * TWP shared modern theme.
+ *
+ * Design tokens + component styles used by the options page and the popups.
+ * Loaded AFTER w3.css so it visually overrides the (legacy) W3.CSS look while
+ * W3.CSS keeps providing the layout grid. Dark mode follows the OS via
+ * prefers-color-scheme and can be forced with <html data-theme="light|dark">
+ * (see twp-theme.js).
+ */
+
+:root {
+  --twp-bg: #f4f5f7;
+  --twp-surface: #ffffff;
+  --twp-surface-2: #f0f1f4;
+  --twp-text: #1c1d22;
+  --twp-text-muted: #5c6370;
+  --twp-border: #d9dce1;
+  --twp-border-strong: #c3c7cf;
+  --twp-accent: #6366f1;
+  --twp-accent-hover: #5457e8;
+  --twp-accent-text: #ffffff;
+  --twp-danger: #d23b3b;
+  --twp-shadow: 0 1px 2px rgba(16, 24, 40, 0.06), 0 4px 12px rgba(16, 24, 40, 0.08);
+  --twp-radius: 10px;
+  --twp-radius-sm: 7px;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --twp-bg: #16181c;
+    --twp-surface: #1e2127;
+    --twp-surface-2: #262a31;
+    --twp-text: #e7e8ea;
+    --twp-text-muted: #9aa1ad;
+    --twp-border: #343a43;
+    --twp-border-strong: #424955;
+    --twp-accent: #818cf8;
+    --twp-accent-hover: #939bff;
+    --twp-accent-text: #0c1322;
+    --twp-danger: #ff6b6b;
+    --twp-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 6px 18px rgba(0, 0, 0, 0.35);
+    color-scheme: dark;
+  }
+}
+
+/* Manual override wins over the OS preference. */
+[data-theme="light"] {
+  --twp-bg: #f4f5f7;
+  --twp-surface: #ffffff;
+  --twp-surface-2: #f0f1f4;
+  --twp-text: #1c1d22;
+  --twp-text-muted: #5c6370;
+  --twp-border: #d9dce1;
+  --twp-border-strong: #c3c7cf;
+  --twp-accent: #6366f1;
+  --twp-accent-hover: #5457e8;
+  --twp-accent-text: #ffffff;
+  --twp-danger: #d23b3b;
+  --twp-shadow: 0 1px 2px rgba(16, 24, 40, 0.06), 0 4px 12px rgba(16, 24, 40, 0.08);
+  color-scheme: light;
+}
+
+[data-theme="dark"] {
+  --twp-bg: #16181c;
+  --twp-surface: #1e2127;
+  --twp-surface-2: #262a31;
+  --twp-text: #e7e8ea;
+  --twp-text-muted: #9aa1ad;
+  --twp-border: #343a43;
+  --twp-border-strong: #424955;
+  --twp-accent: #818cf8;
+  --twp-accent-hover: #939bff;
+  --twp-accent-text: #0c1322;
+  --twp-danger: #ff6b6b;
+  --twp-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 6px 18px rgba(0, 0, 0, 0.35);
+  color-scheme: dark;
+}
+
+/* ---------- base ---------- */
+
+html,
+body {
+  background-color: var(--twp-bg) !important;
+  color: var(--twp-text) !important;
+}
+
+body {
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, Cantarell,
+    "Helvetica Neue", Arial, sans-serif !important;
+  line-height: 1.5;
+}
+
+* {
+  scrollbar-color: var(--twp-border-strong) transparent;
+}
+
+a {
+  color: var(--twp-accent);
+}
+
+b,
+strong {
+  color: var(--twp-text);
+}
+
+/* ---------- W3.CSS visual overrides (layout grid stays, look is replaced) ---------- */
+
+.w3-card,
+.w3-card-2,
+.w3-card-4 {
+  background-color: var(--twp-surface) !important;
+  border: 1px solid var(--twp-border) !important;
+  border-radius: var(--twp-radius) !important;
+  box-shadow: var(--twp-shadow) !important;
+}
+
+.w3-white,
+.w3-light-grey,
+.w3-modal-content {
+  background-color: var(--twp-surface) !important;
+  color: var(--twp-text) !important;
+}
+
+/* Buttons */
+.w3-button,
+button:not(.tab):not(.theme-toggle) {
+  border-radius: var(--twp-radius-sm) !important;
+  font: inherit;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  transition: background-color 0.15s ease, border-color 0.15s ease,
+    box-shadow 0.15s ease, transform 0.05s ease;
+}
+.w3-button:active {
+  transform: translateY(1px);
+}
+
+/* Secondary (outline) buttons: bordered surface so plain buttons read as buttons.
+   Primary (.w3-blue/.w3-black) overrides this below with !important. */
+.w3-button,
+.w3-btn {
+  background-color: var(--twp-surface-2);
+  color: var(--twp-text);
+  border: 1px solid var(--twp-border-strong);
+  padding: 8px 14px;
+}
+.w3-button:hover,
+.w3-btn:hover {
+  border-color: var(--twp-accent);
+  background-color: var(--twp-surface);
+}
+
+/* Primary / accent buttons (W3 used w3-blue / w3-black) */
+.w3-blue,
+.w3-black,
+button.w3-blue,
+.w3-button.w3-blue {
+  background-color: var(--twp-accent) !important;
+  color: var(--twp-accent-text) !important;
+  border: 1px solid transparent !important;
+}
+.w3-blue:hover,
+.w3-black:hover,
+.w3-button.w3-blue:hover {
+  background-color: var(--twp-accent-hover) !important;
+}
+
+/* Form controls */
+select,
+.w3-select,
+input[type="text"],
+input[type="search"],
+input[type="number"],
+input[type="url"],
+.w3-input,
+textarea {
+  background-color: var(--twp-surface) !important;
+  color: var(--twp-text) !important;
+  border: 1px solid var(--twp-border-strong) !important;
+  border-radius: var(--twp-radius-sm) !important;
+  padding: 8px 10px !important;
+  font: inherit;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+select:focus,
+.w3-select:focus,
+input:focus,
+textarea:focus {
+  border-color: var(--twp-accent) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--twp-accent) 25%, transparent) !important;
+}
+
+option {
+  background-color: var(--twp-surface);
+  color: var(--twp-text);
+}
+
+input[type="range"] {
+  accent-color: var(--twp-accent);
+}
+input[type="checkbox"],
+input[type="radio"],
+.w3-check {
+  accent-color: var(--twp-accent);
+  width: 16px;
+  height: 16px;
+  margin: 0 6px 0 0;
+  vertical-align: middle;
+}
+/* keep the label text vertically centered next to its checkbox/radio */
+input[type="checkbox"] + label,
+input[type="radio"] + label,
+.w3-check + label {
+  vertical-align: middle;
+  cursor: pointer;
+}
+
+/* Lists / cards content */
+.w3-ul {
+  background-color: var(--twp-surface) !important;
+  color: var(--twp-text) !important;
+}
+.w3-ul li {
+  border-color: var(--twp-border) !important;
+}
+.w3-ul li:hover,
+.w3-hover-light-grey:hover,
+.w3-hover-light-gray:hover,
+.w3-hover-light-blue:hover {
+  background-color: var(--twp-surface-2) !important;
+  color: var(--twp-text) !important;
+}
+
+kbd {
+  background-color: var(--twp-surface-2);
+  border: 1px solid var(--twp-border-strong);
+  border-radius: 5px;
+  box-shadow: none;
+  color: var(--twp-text);
+  padding: 2px 6px;
+}
+
+/* ---------- modern shell: top bar + tab bar ---------- */
+
+.appbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 20px;
+  background-color: var(--twp-surface);
+  border-bottom: 1px solid var(--twp-border);
+}
+.topbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-weight: 700;
+  font-size: 16px;
+  white-space: nowrap;
+  color: var(--twp-text);
+  text-decoration: none;
+}
+.topbar-brand:hover {
+  color: var(--twp-accent);
+}
+.topbar-logo {
+  height: 28px;
+  width: 28px;
+  display: block;
+  flex: 0 0 auto;
+}
+.topbar-spacer {
+  flex: 1;
+}
+.topbar-section {
+  margin: 0;
+  color: var(--twp-text-muted);
+  font-weight: 600;
+}
+.topbar-patreon img {
+  height: 34px;
+  display: block;
+}
+
+.sponsor-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 1px solid var(--twp-border-strong);
+  border-radius: var(--twp-radius-sm);
+  color: var(--twp-text);
+  text-decoration: none;
+  font-weight: 600;
+  white-space: nowrap;
+  background: var(--twp-surface);
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+.sponsor-button:hover {
+  border-color: #db61a2;
+  background: var(--twp-surface-2);
+}
+.sponsor-heart {
+  color: #db61a2;
+}
+
+.theme-toggle {
+  border: 1px solid var(--twp-border-strong);
+  background: var(--twp-surface-2);
+  color: var(--twp-text);
+  border-radius: var(--twp-radius-sm);
+  width: 38px;
+  height: 34px;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
+.theme-toggle:hover {
+  border-color: var(--twp-accent);
+}
+
+.tabbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 8px 16px;
+  background-color: var(--twp-bg);
+  border-bottom: 1px solid var(--twp-border);
+}
+.tabbar a {
+  padding: 7px 14px;
+  border-radius: 999px;
+  color: var(--twp-text-muted);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 14px;
+  white-space: nowrap;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+.tabbar a:hover {
+  background-color: var(--twp-surface-2);
+  color: var(--twp-text);
+}
+.tabbar a.active {
+  background-color: var(--twp-accent);
+  color: var(--twp-accent-text);
+}
+.tabbar a.tab-accent {
+  color: var(--twp-danger);
+}
+/* external help link: pushed to the right, muted, turns red on hover */
+.tabbar a.tab-report {
+  margin-left: auto;
+  color: var(--twp-text-muted);
+}
+.tabbar a.tab-report:hover {
+  color: var(--twp-danger);
+  background-color: transparent;
+}
+.tabbar-sep {
+  flex-basis: 100%;
+  height: 0;
+}
+
+.content {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 24px 20px 64px;
+}
+.content > div[id] {
+  background-color: var(--twp-surface);
+  border: 1px solid var(--twp-border);
+  border-radius: var(--twp-radius);
+  box-shadow: var(--twp-shadow);
+  padding: 22px 24px !important;
+}
+
+/* ---------- design system: settings search ---------- */
+
+.settings-search {
+  flex: 1 1 220px;
+  max-width: 320px;
+  margin: 0 6px;
+}
+.settings-search input {
+  width: 100%;
+}
+/* a row hidden by the search filter */
+.setting-row[hidden],
+.settings-card[hidden] {
+  display: none !important;
+}
+
+/* ---------- design system: cards / groups ---------- */
+
+.settings-card {
+  background-color: var(--twp-surface);
+  border: 1px solid var(--twp-border);
+  border-radius: var(--twp-radius);
+  margin: 0 0 18px;
+  overflow: hidden;
+}
+.settings-card > .card-title {
+  margin: 0;
+  padding: 12px 16px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--twp-text-muted);
+  background-color: var(--twp-surface-2);
+  border-bottom: 1px solid var(--twp-border);
+}
+
+/* ---------- design system: setting rows ---------- */
+
+.setting-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 16px;
+}
+.settings-card .setting-row + .setting-row {
+  border-top: 1px solid var(--twp-border);
+}
+.setting-text {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.setting-title {
+  margin: 0;
+  font-weight: 600;
+}
+.setting-desc {
+  margin: 2px 0 0;
+  font-size: 12.5px;
+  color: var(--twp-text-muted);
+}
+.setting-control {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.setting-control > select,
+.setting-control > input[type="text"] {
+  min-width: 160px;
+}
+/* list widgets rendered as a card: title+add row, then the list (grows with content) */
+.list-card .list {
+  margin: 0;
+  border-top: 1px solid var(--twp-border);
+  border-radius: 0;
+}
+.list-card .list:empty {
+  border-top: 1px solid var(--twp-border);
+}
+/* remove ("×") button inside list items: flat, red. Keeps w3-display-right's
+   own translate(-50%) vertical centering (so it doesn't shift on click). */
+.list-remove {
+  cursor: pointer;
+  color: var(--twp-danger);
+  font-size: 18px;
+  line-height: 1;
+  padding: 4px 10px;
+  right: 8px !important;
+  border-radius: var(--twp-radius-sm);
+}
+.list-remove:hover {
+  background: color-mix(in srgb, var(--twp-danger) 16%, transparent);
+}
+/* stable slider: fixed track width + non-jittering value readout */
+.setting-control input[type="range"] {
+  width: 150px;
+  margin: 0;
+  vertical-align: middle;
+}
+.setting-control output {
+  min-width: 2.6em;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: var(--twp-text-muted);
+}
+/* full-width controls (e.g. big language selects) wrap below the title */
+.setting-row.is-stacked {
+  flex-direction: column;
+  align-items: stretch;
+}
+.setting-row.is-stacked .setting-control {
+  width: 100%;
+}
+.setting-row.is-stacked .setting-control select {
+  width: 100%;
+}
+
+/* free-form card body (advanced forms: inputs, buttons) */
+.settings-card .card-body {
+  padding: 14px 16px;
+}
+.settings-card .card-body label {
+  display: block;
+  font-weight: 600;
+  margin: 10px 0 4px;
+}
+.settings-card .card-body input[type="text"] {
+  width: 100%;
+}
+.settings-card .card-body .setting-desc {
+  margin: 0 0 10px;
+}
+.button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+/* Danger / destructive buttons (e.g. reset to defaults) */
+.w3-button.danger,
+button.danger {
+  background-color: transparent !important;
+  color: var(--twp-danger) !important;
+  border: 1px solid var(--twp-danger) !important;
+}
+.w3-button.danger:hover,
+button.danger:hover {
+  background-color: var(--twp-danger) !important;
+  color: #fff !important;
+  border-color: var(--twp-danger) !important;
+}
+
+/* Danger zone: visually set-apart card for destructive actions */
+.settings-card.danger-zone {
+  border-color: color-mix(in srgb, var(--twp-danger) 45%, var(--twp-border));
+}
+.settings-card.danger-zone .card-title {
+  color: var(--twp-danger);
+}
+
+/* ---------- design system: toggle switches (from checkboxes) ---------- */
+
+input.w3-check,
+input.check,
+input[type="checkbox"].switch {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 40px;
+  height: 22px;
+  border-radius: 999px;
+  background: var(--twp-border-strong);
+  position: relative;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  flex: 0 0 auto;
+}
+input.w3-check::after,
+input.check::after,
+input[type="checkbox"].switch::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  transition: transform 0.15s ease;
+}
+input.w3-check:checked,
+input.check:checked,
+input[type="checkbox"].switch:checked {
+  background: var(--twp-accent);
+}
+input.w3-check:checked::after,
+input.check:checked::after,
+input[type="checkbox"].switch:checked::after {
+  transform: translateX(18px);
+}
+input.w3-check:disabled,
+input.check:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* ---------- design system: lists & empty states ---------- */
+
+.list:empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 64px;
+}
+.list:empty::after {
+  content: attr(data-empty-text);
+  color: var(--twp-text-muted);
+  font-size: 13px;
+}
+
+/* ---------- a11y ---------- */
+
+:focus-visible {
+  outline: 2px solid var(--twp-accent);
+  outline-offset: 2px;
+}
+.tabbar a:focus-visible {
+  outline-offset: -2px;
+}

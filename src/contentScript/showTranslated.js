@@ -425,7 +425,6 @@ Promise.all([twpConfig.onReady(), getTabHostName()]).then(function (_) {
                     <ul>
                         <li title="Google" id="sGoogle">g</li>
                         <li title="Bing" id="sBing">b</li>
-                        <li title="Yandex" id="sYandex">y</li>
                         <li title="DeepL" id="sDeepL" hidden>d</li>
                         <li title="Listen" data-i18n-title="btnListen" id="listen">
                             <svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
@@ -549,7 +548,6 @@ Promise.all([twpConfig.onReady(), getTabHostName()]).then(function (_) {
     eTextTranslated = shadowRoot.getElementById("eTextTranslated");
 
     const sGoogle = shadowRoot.getElementById("sGoogle");
-    const sYandex = shadowRoot.getElementById("sYandex");
     const sBing = shadowRoot.getElementById("sBing");
     const sDeepL = shadowRoot.getElementById("sDeepL");
 
@@ -559,23 +557,10 @@ Promise.all([twpConfig.onReady(), getTabHostName()]).then(function (_) {
       translateThisNode(null, true);
 
       sGoogle.classList.remove("selected");
-      sYandex.classList.remove("selected");
       sBing.classList.remove("selected");
       sDeepL.classList.remove("selected");
 
       sGoogle.classList.add("selected");
-    };
-    sYandex.onclick = () => {
-      currentTextTranslatorService = "yandex";
-      twpConfig.set("textTranslatorService", "yandex");
-      translateThisNode(null, true);
-
-      sGoogle.classList.remove("selected");
-      sYandex.classList.remove("selected");
-      sBing.classList.remove("selected");
-      sDeepL.classList.remove("selected");
-
-      sYandex.classList.add("selected");
     };
     sBing.onclick = () => {
       currentTextTranslatorService = "bing";
@@ -583,7 +568,6 @@ Promise.all([twpConfig.onReady(), getTabHostName()]).then(function (_) {
       translateThisNode(null, true);
 
       sGoogle.classList.remove("selected");
-      sYandex.classList.remove("selected");
       sBing.classList.remove("selected");
       sDeepL.classList.remove("selected");
 
@@ -595,7 +579,6 @@ Promise.all([twpConfig.onReady(), getTabHostName()]).then(function (_) {
       translateThisNode(null, true);
 
       sGoogle.classList.remove("selected");
-      sYandex.classList.remove("selected");
       sBing.classList.remove("selected");
       sDeepL.classList.remove("selected");
 
@@ -662,9 +645,7 @@ Promise.all([twpConfig.onReady(), getTabHostName()]).then(function (_) {
       );
     }
 
-    if (currentTextTranslatorService === "yandex") {
-      sYandex.classList.add("selected");
-    } else if (currentTextTranslatorService == "deepl") {
+    if (currentTextTranslatorService == "deepl") {
       sDeepL.classList.add("selected");
     } else if (currentTextTranslatorService == "bing") {
       sBing.classList.add("selected");

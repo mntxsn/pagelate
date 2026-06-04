@@ -17,7 +17,7 @@ $("#btnApply").addEventListener("click", () => {
         action: "improveTranslation",
         sourceLanguage: $("#selectOriginalLanguage").value,
         pageTranslatorService: $("#pageTranslatorService").value,
-        dontSortResults: $("#dontSortResults").value,
+        dontSortResults: $("#dontSortResults").checked ? "yes" : "no",
         targetLanguage: $("#selectTargetLanguage").value,
       },
       (response) => {
@@ -35,7 +35,7 @@ twpConfig
     twpI18n.translateDocument();
 
     $("#pageTranslatorService").value = twpConfig.get("pageTranslatorService");
-    $("#dontSortResults").value = twpConfig.get("dontSortResults");
+    $("#dontSortResults").checked = twpConfig.get("dontSortResults") === "yes";
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       chrome.tabs.sendMessage(
         tabs[0].id,
@@ -63,7 +63,7 @@ twpConfig
         { action: "getDontSortResults" },
         (dontSortResults) => {
           checkedLastError();
-          $("#dontSortResults").value = dontSortResults ? "yes" : "no";
+          $("#dontSortResults").checked = !!dontSortResults;
         }
       );
     });
@@ -134,55 +134,10 @@ twpConfig
     }
     selectTargetLanguage.value = twpConfig.get("targetLanguages")[0];
 
-    function disableDarkMode() {
-      if (!$("#lightModeElement")) {
-        const el = document.createElement("style");
-        el.setAttribute("id", "lightModeElement");
-        el.setAttribute("rel", "stylesheet");
-        el.textContent = `
-            body {
-                color: rgb(0, 0, 0);
-                background-color: rgb(224, 224, 224);
-            }
-  
-            .select, #btnApply {
-                color: black;
-                background-color: rgba(0, 0, 0, 0.2);
-            }
-            
-            .select:hover, .select:focus, #btnApply:hover {
-                background-color: rgba(0, 0, 0, 0.4);
-            }
-  
-            .mdiv, .md {
-                background-color: rgb(0, 0, 0);
-            }
-            `;
-        document.head.appendChild(el);
-      }
-    }
-
-    function enableDarkMode() {
-      if ($("#lightModeElement")) {
-        $("#lightModeElement").remove();
-      }
-    }
-
-    switch (twpConfig.get("darkMode")) {
-      case "auto":
-        if (matchMedia("(prefers-color-scheme: dark)").matches) {
-          enableDarkMode();
-        } else {
-          disableDarkMode();
-        }
-        break;
-      case "yes":
-        enableDarkMode();
-        break;
-      case "no":
-        disableDarkMode();
-        break;
-      default:
-        break;
+    // Theme (light/dark) is driven by twp-theme.css via the data-theme attribute;
+    // see twp-theme.js. "auto" follows the OS (prefers-color-scheme).
+    {
+      const mode = twpConfig.get("darkMode"); // "auto" | "yes" | "no"
+      twpApplyTheme(mode === "yes" ? "dark" : mode === "no" ? "light" : "auto");
     }
   });

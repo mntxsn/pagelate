@@ -1,6 +1,27 @@
 {
   "extensionDescription": {
-    "message": "Übersetzen Sie Ihre Seite in Echtzeit mit Google oder Yandex."
+    "message": "Webseiten und markierten Text in Echtzeit mit Google oder Bing übersetzen."
+  },
+  "lblServices": {
+    "message": "Dienste"
+  },
+  "lblPageBehavior": {
+    "message": "Seitenverhalten"
+  },
+  "lblTextToSpeech": {
+    "message": "Sprachausgabe"
+  },
+  "descPageTranslatorService": {
+    "message": "Dienst zum Übersetzen ganzer Webseiten."
+  },
+  "descTextTranslatorService": {
+    "message": "Dienst zum Übersetzen von markiertem Text und dem Popup."
+  },
+  "descTranslateDynamicallyCreatedContent": {
+    "message": "Übersetzt nachgeladene Inhalte erneut (Infinite Scroll, Live-Updates)."
+  },
+  "descDontSortResults": {
+    "message": "Etwas schneller, aber die Reihenfolge der Segmente kann ungenauer sein."
   },
   "pageActionTitle": {
     "message": "Diese Seite übersetzen"
@@ -73,9 +94,6 @@
   },
   "optionPopupThreeFingers": {
     "message": "Wenn ich den Bildschirm mit drei Fingern berühre"
-  },
-  "msgOpenOnYandexTranslator": {
-    "message": "In Yandex Übersetzung öffnen"
   },
   "lblOthers": {
     "message": "Andere"
@@ -183,7 +201,7 @@
     "message": "Übersetzten Text beim Sofern auf diesen Seiten anzeigen"
   },
   "popupBlueWhenSiteIsTranslated": {
-    "message": "Mache das Pop-Up-Symbol blau, wenn die Seite übersetzt ist"
+    "message": "Symbol hervorheben, wenn die Seite übersetzt ist"
   },
   "more": {
     "message": "Mehr"
@@ -192,13 +210,13 @@
     "message": "Weniger"
   },
   "dontShowIfIsNotValidText": {
-    "message": "Nicht zeigen, wenn der ausgewählte Text ungültig ist"
+    "message": "Nicht anzeigen, wenn der ausgewählte Text ungültig ist"
   },
   "dontShowIfPageLangIsTargetLang": {
     "message": "Nicht anzeigen, wenn die Seitensprache die Zielsprache ist"
   },
   "dontShowIfPageLangIsUnknown": {
-    "message": "Nicht anzeigen wenn die Sprache der Seite unbekannt ist"
+    "message": "Nicht anzeigen, wenn die Sprache der Seite unbekannt ist"
   },
   "dontShowIfSelectedTextIsTargetLang": {
     "message": "Nicht anzeigen, wenn die Sprache des ausgewählten Textes die Zielsprache ist"
@@ -265,6 +283,18 @@
   },
   "lblPersonalSettings": {
     "message": "Persönliche Einstellungen"
+  },
+  "lblBackupRestore": {
+    "message": "Sicherung & Wiederherstellung"
+  },
+  "descBackupRestore": {
+    "message": "Sichern Sie alle Einstellungen in einer Datei oder stellen Sie sie auf einem anderen Gerät wieder her."
+  },
+  "lblDangerZone": {
+    "message": "Gefahrenzone"
+  },
+  "descResetToDefault": {
+    "message": "Setzt alle Einstellungen auf die Standardwerte zurück. Dies kann nicht rückgängig gemacht werden."
   },
   "backupToFile": {
     "message": "Backup in eine Datei"
@@ -335,7 +365,10 @@
     "message": "Mit PayPal spenden"
   },
   "lblAutoTranslateWhenClickingALink": {
-    "message": "Automatisch übersetzen, wenn Sie auf einen Link klicken, der Sie auf die gleiche Domain bringt wie die aktuelle Seite"
+    "message": "Links zur selben Seite automatisch übersetzen"
+  },
+  "descAutoTranslateWhenClickingALink": {
+    "message": "Wenn Sie auf einen Link zur gleichen Domain klicken, wird die neue Seite automatisch übersetzt."
   },
   "openNativeShortcutManager": {
     "message": "Native Tastenkürzelverwaltung öffnen"
@@ -360,7 +393,10 @@
     }
   },
   "translateClickingOnce": {
-    "message": "Die Seite übersetzen, wenn einmal auf den Button in der Adressleiste geklickt wird. (Um das Popup zu sehen, rechts-klicken)"
+    "message": "Mit einem Klick auf das Adressleisten-Symbol übersetzen"
+  },
+  "descTranslateClickingOnce": {
+    "message": "Ein Rechtsklick auf das Symbol öffnet stattdessen das Popup."
   },
   "btnShowPopup": {
     "message": "Pop-up anzeigen"
@@ -426,7 +462,10 @@
     "message": "Ersetze den ausgewählten Text mit dem übersetzten Text sofort"
   },
   "optionsAddToCustomDictionary": {
-    "message": "Zum benutzerdefinierten Wörterbuch hinzufügen (Damit können Sie bestimmte Wörter während der Webseiten Übersetzung überspringen)"
+    "message": "Benutzerdefiniertes Wörterbuch"
+  },
+  "descCustomDictionary": {
+    "message": "Hier hinzugefügte Wörter werden bei der Seitenübersetzung übersprungen."
   },
   "msgSelectTargetLanguage": {
     "message": "Übersetzen Sie Webseiten in die gewünschte Sprache"
@@ -502,7 +541,10 @@
     "message": "Ich habe diese Erweiterung über fünf Jahre lang entwickelt, aktualisiert und unterstützt. Es ist erstaunlich zu sehen, dass wir täglich über 600.000 Benutzer haben.\n\nIch wäre dankbar, wenn Sie mir finanziell über Paypal oder durch eine Mitgliedschaft bei meinem Patreon helfen könnten. Ihr Beitrag hilft mir, weiterhin Verbesserungen an dieser Erweiterung vorzunehmen.\n\nVielen Dank an alle, die bereits zu diesem Projekt beigetragen haben."
   },
   "lblEnableDiskCache": {
-    "message": "Persistenten Übersetzungscache aktivieren (On-Disk-Cache)"
+    "message": "Übersetzungen auf der Festplatte speichern"
+  },
+  "descEnableDiskCache": {
+    "message": "Behält Übersetzungen nach einem Neustart des Browsers — schnelleres erneutes Übersetzen und weniger Anfragen an den Übersetzungsdienst."
   },
   "selectOriginalLanguage": {
     "message": "Wählen Sie die ursprüngliche Website-Sprache aus"
@@ -511,7 +553,7 @@
     "message": "Zielsprache auswählen"
   },
   "msgImproveTranslation": {
-    "message": "Verbessern Sie die Übersetzung"
+    "message": "Übersetzungsoptionen"
   },
   "lblExperimental": {
     "message": "Experimental"
@@ -523,16 +565,16 @@
     "message": "Wählen Sie die Übersetzungsdienste aus, die Sie nutzen möchten"
   },
   "useAlternativeService": {
-    "message": "Nutzen Sie stillschweigend einen alternativen Übersetzungsdienst, wenn die aktuelle Zielsprache vom ausgewählten Übersetzungsdienst nicht unterstützt wird"
+    "message": "Ersatz-Übersetzungsdienst verwenden"
+  },
+  "descUseAlternativeService": {
+    "message": "Wird genutzt, wenn der gewählte Dienst die Zielsprache nicht unterstützt."
   },
   "msgDefaultLanguage": {
     "message": "Standardsprache"
   },
   "msgExtUILanguage": {
     "message": "Sprache der Benutzeroberfläche der Erweiterung"
-  },
-  "msgSetDeepLAlert": {
-    "message": "Sind Sie sicher, dass Sie den Übersetzungsdienst auf DeepL einstellen möchten?\nEs öffnet sich ein neuer Tab und die Übersetzung findet dort statt."
   },
   "lblTextToSpeechService": {
     "message": "Text-to-Speech-Dienst"

@@ -6,6 +6,94 @@ body {
   font-size: 0.8em;
 }
 
+/* modern top toolbar (replaces the absolutely-positioned overlay icons) */
+.popup-header {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-bottom: 8px;
+}
+.popup-header-spacer {
+  flex: 1;
+}
+.popup-header #divIconTranslate {
+  position: relative;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+.popup-header #divMenu {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.popup-icon-btn {
+  border-radius: 50%;
+  padding: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.popup-header #btnPatreon {
+  margin-top: 0;
+}
+/* language selector grid */
+.lang-bar {
+  display: flex;
+  gap: 6px;
+  width: 100% !important;
+  margin-bottom: 6px;
+}
+.lang-bar button {
+  width: 50% !important;
+  display: flex !important;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-height: 54px;
+  height: 54px;
+  padding: 8px !important;
+  border-radius: 10px !important;
+  border: 1px solid var(--twp-border) !important;
+  background-color: var(--twp-surface) !important;
+  color: var(--twp-text) !important;
+  font-weight: 700;
+}
+.lang-bar button.w3-buttonSelected {
+  background-color: var(--twp-accent) !important;
+  color: var(--twp-accent-text) !important;
+  border-color: transparent !important;
+}
+/* source-language subscript on the "Original" button: flow below, centered */
+.lang-bar button .w3-text-pale-blue {
+  position: static !important;
+  font-size: 9px !important;
+  font-weight: 600;
+  opacity: 0.85;
+}
+
+/* settings content as a card; themed dividers */
+.popup-settings {
+  background-color: var(--twp-surface);
+  border: 1px solid var(--twp-border);
+  border-radius: 12px;
+  padding: 4px 12px !important;
+  margin-top: 8px !important;
+}
+hr {
+  border: 0;
+  border-top: 1px solid var(--twp-border);
+  margin: 6px 0;
+}
+
+/* compact setting rows for the narrow popup */
+.setting-row {
+  padding: 8px 2px;
+  gap: 12px;
+}
+
 .w3-bar button {
   width: 50% !important;
   padding-left: 0 !important;
@@ -13,7 +101,8 @@ body {
 }
 
 .w3-buttonSelected {
-  background-color: #2196f3;
+  background-color: var(--twp-accent) !important;
+  color: var(--twp-accent-text) !important;
 }
 
 .margin10 {
@@ -29,7 +118,7 @@ body {
   height: 14px;
   width: 2px;
   margin-left: 5px;
-  background-color: black;
+  background-color: var(--twp-text);
   transform: rotate(45deg);
   z-index: 1;
 }
@@ -37,7 +126,7 @@ body {
 .md {
   height: 14px;
   width: 2px;
-  background-color: black;
+  background-color: var(--twp-text);
   transform: rotate(90deg);
   z-index: 2;
 }
@@ -59,22 +148,10 @@ body {
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  background-image: radial-gradient(black 2px, transparent 2px),
-    radial-gradient(black 2px, transparent 2px),
-    radial-gradient(black 2px, transparent 2px);
+  background-image: radial-gradient(var(--twp-text) 2px, transparent 2px),
+    radial-gradient(var(--twp-text) 2px, transparent 2px),
+    radial-gradient(var(--twp-text) 2px, transparent 2px);
   background-position: center -5px, center center, center 5px;
-}
-
-#iconSwap {
-  display: none;
-}
-
-#divIconTranslate:hover #iconSwap {
-  display: block;
-}
-
-#divIconTranslate:hover #iconTranslate {
-  opacity: 0.6;
 }
 
 #divIconTranslate > img {
@@ -114,7 +191,7 @@ hr {
 }
 
 .arrow {
-  border: solid black;
+  border: solid var(--twp-text);
   border-width: 0 1px 1px 0;
   display: inline-block;
   padding: 3px;
@@ -248,12 +325,14 @@ hr {
 #btnImproveTranslation {
   width: 100%;
   cursor: pointer;
-  background-color: white;
-  border: 1px solid lightblue;
+  color: var(--twp-text);
+  background-color: var(--twp-surface);
+  border: 1px solid var(--twp-border-strong);
   border-radius: 10px;
+  padding: 6px 10px;
 }
 
 #btnImproveTranslation:hover {
   scale: 1.03;
-  box-shadow: 0 0 3px -2px black;
+  border-color: var(--twp-accent);
 }

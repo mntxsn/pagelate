@@ -1,65 +1,53 @@
 "use strict";
 
-setTimeout(() => {
-  fetch("./release-notes/en.html")
-    .then((response) => response.text())
-    .then((responseText) => {
-      window.scrollTo(0, 0);
-      document.getElementById("release_notes").innerHTML = responseText;
-      document.getElementById("_msgHasBeenUpdated").textContent =
-        twpI18n.getMessage("msgHasBeenUpdated");
-      document.getElementById("_msgHasBeenUpdated").innerHTML = document
-        .getElementById("_msgHasBeenUpdated")
-        .textContent.replace(
-          "#EXTENSION_NAME#",
-          "<b>" + chrome.runtime.getManifest().name + "</b>"
-        )
-        .replace(
-          "#EXTENSION_VERSION#",
-          "<b>" + chrome.runtime.getManifest().version + "</b>"
-        );
-      document.getElementById("_donationText").textContent =
-        twpI18n.getMessage("donationText");
-      document.getElementById("_donatewithpaypal").textContent =
-        twpI18n.getMessage("donatewithpaypal");
-
-      document.getElementById("_donationRecipient").textContent =
-        twpI18n.getMessage("msgDonationRecipient");
-      document.getElementById("_donationRecipient").innerHTML = document
-        .getElementById("_donationRecipient")
-        .textContent.replace(
-          "#EXTENSION_NAME#",
-          "<b>" + chrome.runtime.getManifest().name + "</b>"
-        );
-
-      // donation options
-      if (navigator.language === "pt-BR") {
-        $("#_currency").value = "BRL";
-        $("#_donateInUSD").style.display = "none";
-      } else {
-        $("#_currency").value = "USD";
-        $("#_donateInBRL").style.display = "none";
-      }
-
-      $("#_currency").onchange = (e) => {
-        if (e.target.value === "BRL") {
-          $("#_donateInUSD").style.display = "none";
-          $("#_donateInBRL").style.display = "block";
-        } else {
-          $("#_donateInUSD").style.display = "block";
-          $("#_donateInBRL").style.display = "none";
-        }
-      };
-
-      const donationOverflow = document.getElementById("donationOverflow");
-      setTimeout(() => {
-        donationOverflow.style.display = "none";
-      }, 1000);
-      donationOverflow.style.display = "block";
-    });
-}, 800);
-
 var $ = document.querySelector.bind(document);
+
+/**
+ * Visually turns the boolean Yes/No <select>s inside ".setting-control" into
+ * toggle switches, without changing options.js's read/write logic: the native
+ * <select> stays in the DOM (hidden) and remains the source of truth. The switch
+ * mirrors it and dispatches a "change" event on the select so existing handlers
+ * fire. Only affects selects with exactly the two options "yes"/"no" and without
+ * a data-no-switch attribute (so multi-value selects like darkMode are skipped).
+ */
+function enhanceYesNoSelects() {
+  document.querySelectorAll(".setting-control > select").forEach((select) => {
+    if (select.dataset.noSwitch !== undefined || select.dataset.switchified)
+      return;
+    const values = Array.from(select.options).map((o) => o.value);
+    if (values.length !== 2 || !values.includes("yes") || !values.includes("no"))
+      return;
+    select.dataset.switchified = "1";
+    select.style.display = "none";
+
+    const sw = document.createElement("input");
+    sw.type = "checkbox";
+    sw.className = "switch";
+    sw.checked = select.value === "yes";
+    sw.setAttribute("role", "switch");
+    sw.setAttribute("aria-checked", String(sw.checked));
+    const titleEl = select
+      .closest(".setting-row")
+      ?.querySelector(".setting-title");
+    if (titleEl) sw.setAttribute("aria-label", titleEl.textContent.trim());
+
+    sw.addEventListener("change", () => {
+      select.value = sw.checked ? "yes" : "no";
+      sw.setAttribute("aria-checked", String(sw.checked));
+      select.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+    // keep the switch in sync if the select is changed programmatically
+    select.addEventListener("change", () => {
+      const on = select.value === "yes";
+      if (sw.checked !== on) {
+        sw.checked = on;
+        sw.setAttribute("aria-checked", String(on));
+      }
+    });
+
+    select.insertAdjacentElement("afterend", sw);
+  });
+}
 
 twpConfig
   .onReady()
@@ -97,17 +85,21 @@ twpConfig
     }
 
     let sideBarIsVisible = false;
-    $("#btnOpenMenu").onclick = (e) => {
-      $("#menuContainer").classList.toggle("change");
+    // The legacy sidebar/hamburger was replaced by the top tab bar; keep this
+    // guarded in case the elements are absent.
+    if ($("#btnOpenMenu")) {
+      $("#btnOpenMenu").onclick = (e) => {
+        $("#menuContainer").classList.toggle("change");
 
-      if (sideBarIsVisible) {
-        $("#sideBar").style.display = "none";
-        sideBarIsVisible = false;
-      } else {
-        $("#sideBar").style.display = "block";
-        sideBarIsVisible = true;
-      }
-    };
+        if (sideBarIsVisible) {
+          $("#sideBar").style.display = "none";
+          sideBarIsVisible = false;
+        } else {
+          $("#sideBar").style.display = "block";
+          sideBarIsVisible = true;
+        }
+      };
+    }
 
     function hashchange() {
       const hash = location.hash || "#languages";
@@ -119,43 +111,40 @@ twpConfig
         $("#hotkeys"),
         $("#privacy"),
         $("#storage"),
-        $("#others"),
         $("#experimental"),
         $("#donation"),
-        $("#release_notes"),
       ];
       divs.forEach((element) => {
         element.style.display = "none";
       });
 
       document.querySelectorAll("nav a").forEach((a) => {
-        a.classList.remove("w3-light-grey");
+        a.classList.remove("active");
+        a.removeAttribute("aria-current");
       });
 
       $(hash).style.display = "block";
-      $('a[href="' + hash + '"]').classList.add("w3-light-grey");
+      const activeTab = $('a[href="' + hash + '"]');
+      if (activeTab) {
+        activeTab.classList.add("active");
+        activeTab.setAttribute("aria-current", "page");
+      }
 
       let text;
       if (hash === "#donation") {
         text = twpI18n.getMessage("lblMakeDonation");
-      } else if (hash === "#release_notes") {
-        text = twpI18n.getMessage("lblReleaseNotes");
       } else {
         text = twpI18n.getMessage("lblSettings");
       }
       $("#itemSelectedName").textContent = text;
 
-      if (sideBarIsVisible) {
+      if (sideBarIsVisible && $("#sideBar")) {
         $("#menuContainer").classList.toggle("change");
         $("#sideBar").style.display = "none";
         sideBarIsVisible = false;
       }
 
-      if (hash === "#release_notes") {
-        $("#btnPatreon").style.display = "none";
-      } else {
-        $("#btnPatreon").style.display = "block";
-      }
+      $("#btnPatreon").style.display = "block";
 
       if (hash === "#translations") {
         $("#translations").insertBefore(
@@ -171,6 +160,23 @@ twpConfig
     }
     hashchange();
     window.addEventListener("hashchange", hashchange);
+
+    // Tab clicks: avoid the browser's anchor-jump (which scrolls down,
+    // especially when clicking the already-active tab). Route manually and
+    // always keep the view scrolled to the top.
+    document.querySelectorAll('#tabbar a[href^="#"]').forEach((a) => {
+      a.addEventListener("click", (e) => {
+        e.preventDefault();
+        const targetHash = a.getAttribute("href");
+        if (!targetHash) return;
+        if (location.hash !== targetHash) {
+          location.hash = targetHash; // triggers hashchange()
+        } else {
+          hashchange();
+        }
+        window.scrollTo({ top: 0 });
+      });
+    });
 
     function fillLanguageList(select) {
       let langs = twpLang.getLanguageList();
@@ -205,25 +211,36 @@ twpConfig
     fillLanguageList($("#addLangToTranslateWhenHovering"));
 
     function updateDarkMode() {
-      switch (twpConfig.get("darkMode")) {
-        case "auto":
-          if (matchMedia("(prefers-color-scheme: dark)").matches) {
-            enableDarkMode();
-          } else {
-            disableDarkMode();
-          }
-          break;
-        case "yes":
-          enableDarkMode();
-          break;
-        case "no":
-          disableDarkMode();
-          break;
-        default:
-          break;
+      const mode = twpConfig.get("darkMode"); // "auto" | "yes" | "no"
+      // "auto" follows the OS via CSS (prefers-color-scheme); "yes"/"no" force it.
+      twpApplyTheme(mode === "yes" ? "dark" : mode === "no" ? "light" : "auto");
+      // Persist so twp-theme.js can restore a forced theme early (no flash).
+      try {
+        if (mode === "yes") sessionStorage.setItem("twpTheme", "dark");
+        else if (mode === "no") sessionStorage.setItem("twpTheme", "light");
+        else sessionStorage.removeItem("twpTheme");
+      } catch (e) {}
+
+      const toggle = $("#themeToggle");
+      if (toggle) {
+        toggle.textContent = mode === "yes" ? "🌙" : mode === "no" ? "☀" : "◐";
+        toggle.title = twpI18n.getMessage("lblDarkMode") + " — " + mode;
       }
     }
     updateDarkMode();
+
+    // Top-bar quick toggle cycles auto -> dark -> light -> auto and keeps the
+    // Style-tab <select id="darkMode"> in sync.
+    if ($("#themeToggle")) {
+      $("#themeToggle").onclick = () => {
+        const order = ["auto", "yes", "no"];
+        const current = twpConfig.get("darkMode") || "auto";
+        const next = order[(order.indexOf(current) + 1) % order.length];
+        twpConfig.set("darkMode", next);
+        if ($("#darkMode")) $("#darkMode").value = next;
+        updateDarkMode();
+      };
+    }
 
     // target languages
     $("#selectUiLanguage").value =
@@ -341,7 +358,7 @@ twpConfig
       li.textContent = langName;
 
       const close = document.createElement("span");
-      close.setAttribute("class", "w3-button w3-transparent w3-display-right");
+      close.setAttribute("class", "list-remove w3-display-right");
       close.innerHTML = "&times;";
 
       close.onclick = (e) => {
@@ -382,7 +399,7 @@ twpConfig
       li.textContent = langName;
 
       const close = document.createElement("span");
-      close.setAttribute("class", "w3-button w3-transparent w3-display-right");
+      close.setAttribute("class", "list-remove w3-display-right");
       close.innerHTML = "&times;";
 
       close.onclick = (e) => {
@@ -423,7 +440,7 @@ twpConfig
       li.textContent = langName;
 
       const close = document.createElement("span");
-      close.setAttribute("class", "w3-button w3-transparent w3-display-right");
+      close.setAttribute("class", "list-remove w3-display-right");
       close.innerHTML = "&times;";
 
       close.onclick = (e) => {
@@ -472,7 +489,7 @@ twpConfig
       li.textContent = hostname;
 
       const close = document.createElement("span");
-      close.setAttribute("class", "w3-button w3-transparent w3-display-right");
+      close.setAttribute("class", "list-remove w3-display-right");
       close.innerHTML = "&times;";
 
       close.onclick = (e) => {
@@ -513,7 +530,7 @@ twpConfig
       li.textContent = hostname;
 
       const close = document.createElement("span");
-      close.setAttribute("class", "w3-button w3-transparent w3-display-right");
+      close.setAttribute("class", "list-remove w3-display-right");
       close.innerHTML = "&times;";
 
       close.onclick = (e) => {
@@ -555,7 +572,7 @@ twpConfig
         li.textContent = keyWord;
       }
       const close = document.createElement("span");
-      close.setAttribute("class", "w3-button w3-transparent w3-display-right");
+      close.setAttribute("class", "list-remove w3-display-right");
       close.innerHTML = "&times;";
 
       close.onclick = (e) => {
@@ -602,7 +619,7 @@ twpConfig
       li.textContent = hostname;
 
       const close = document.createElement("span");
-      close.setAttribute("class", "w3-button w3-transparent w3-display-right");
+      close.setAttribute("class", "list-remove w3-display-right");
       close.innerHTML = "&times;";
 
       close.onclick = (e) => {
@@ -798,12 +815,6 @@ twpConfig
       twpConfig.get("dontShowIfSelectedTextIsUnknown") === "yes" ? true : false;
 
     // style options
-    $("#useOldPopup").onchange = (e) => {
-      twpConfig.set("useOldPopup", e.target.value);
-      updateDarkMode();
-    };
-    $("#useOldPopup").value = twpConfig.get("useOldPopup");
-
     $("#darkMode").onchange = (e) => {
       twpConfig.set("darkMode", e.target.value);
       updateDarkMode();
@@ -854,6 +865,14 @@ twpConfig
     };
     $("#translateTextOverMouseWhenPressTwice").checked =
       twpConfig.get("translateTextOverMouseWhenPressTwice") === "yes";
+
+    // Whether shortcuts can be edited in-page. commands.update() is Firefox-only;
+    // modern Chrome exposes a `browser` alias (without update()), so a bare
+    // `typeof browser === "undefined"` no longer detects Chrome. Check the method.
+    const canEditShortcutsInPage =
+      typeof browser !== "undefined" &&
+      browser.commands &&
+      typeof browser.commands.update === "function";
 
     const defaultShortcuts = {};
     for (const name of Object.keys(
@@ -1001,10 +1020,12 @@ twpConfig
         const hotkeys = twpConfig.get("hotkeys");
         hotkeys[hotkeyname] = keystring;
         twpConfig.set("hotkeys", hotkeys);
-        browser.commands.update({
-          name: name,
-          shortcut: keystring,
-        });
+        if (canEditShortcutsInPage) {
+          browser.commands.update({
+            name: name,
+            shortcut: keystring,
+          });
+        }
       }
 
       function onkeychange(e) {
@@ -1072,7 +1093,8 @@ twpConfig
       };
 
       //*
-      if (typeof browser === "undefined") {
+      if (!canEditShortcutsInPage) {
+        // Chrome: in-page editing isn't supported; keep the native manager.
         input.setAttribute("disabled", "");
         resetKey.style.display = "none";
         removeKey.style.display = "none";
@@ -1097,10 +1119,6 @@ twpConfig
     $("#useAlternativeService").value = twpConfig.get("useAlternativeService");
 
     {
-      if (platformInfo.isMobile.any) {
-        $("#btnEnableDeepL").setAttribute("disabled", "");
-      }
-
       const updateServiceSelector = (enabledServices) => {
         document
           .querySelectorAll("#pageTranslatorService option")
@@ -1124,8 +1142,6 @@ twpConfig
       const servicesInfo = [
         { selector: "#btnEnableGoogle", svName: "google" },
         { selector: "#btnEnableBing", svName: "bing" },
-        { selector: "#btnEnableYandex", svName: "yandex" },
-        { selector: "#btnEnableDeepL", svName: "deepl" },
       ];
 
       servicesInfo.forEach((svInfo) => {
@@ -1137,10 +1153,7 @@ twpConfig
               enabledCount++;
             }
           });
-          if (
-            enabledCount === 0 ||
-            (enabledCount === 1 && $("#btnEnableDeepL").checked)
-          ) {
+          if (enabledCount === 0) {
             if (e.target === $("#btnEnableGoogle")) {
               $("#btnEnableBing").checked = true;
             } else {
@@ -1164,7 +1177,7 @@ twpConfig
             twpConfig.set("pageTranslatorService", enabledServices[0]);
           }
 
-          const pageTranslationServices = ["google", "bing", "yandex"];
+          const pageTranslationServices = ["google", "bing"];
           chrome.runtime.sendMessage(
             {
               action: "restorePagesWithServiceNames",
@@ -1208,7 +1221,7 @@ twpConfig
       }
     };
 
-    $("#enableDiskCache").oninput = (e) => {
+    $("#enableDiskCache").onchange = (e) => {
       twpConfig.set("enableDiskCache", $("#enableDiskCache").value);
     };
     $("#enableDiskCache").value = twpConfig.get("enableDiskCache");
@@ -1276,11 +1289,6 @@ twpConfig
     };
 
     // others options
-    $("#showReleaseNotes").onchange = (e) => {
-      twpConfig.set("showReleaseNotes", e.target.value);
-    };
-    $("#showReleaseNotes").value = twpConfig.get("showReleaseNotes");
-
     $("#whenShowMobilePopup").onchange = (e) => {
       twpConfig.set("whenShowMobilePopup", e.target.value);
     };
@@ -1312,23 +1320,17 @@ twpConfig
     };
     $("#translateClickingOnce").value = twpConfig.get("translateClickingOnce");
 
-    $("#btnCalculateStorage").style.display = "inline-block";
-    $("#storageUsed").style.display = "none";
-    $("#btnCalculateStorage").onclick = (e) => {
-      $("#btnCalculateStorage").style.display = "none";
-
-      chrome.runtime.sendMessage(
-        {
-          action: "getCacheSize",
-        },
-        (result) => {
-          checkedLastError();
-
-          $("#storageUsed").textContent = result;
-          $("#storageUsed").style.display = "inline-block";
-        }
-      );
-    };
+    // Show the cache size automatically (no manual "Calculate" step).
+    $("#storageUsed").textContent = "…";
+    chrome.runtime.sendMessage(
+      {
+        action: "getCacheSize",
+      },
+      (result) => {
+        checkedLastError();
+        $("#storageUsed").textContent = result || "0 KB";
+      }
+    );
 
     // experimental options
     $("#addLibre").onclick = () => {
@@ -1462,18 +1464,6 @@ twpConfig
       });
     }
 
-    $("#showMobilePopupOnDesktop").onchange = (e) => {
-      twpConfig.set("showMobilePopupOnDesktop", e.target.value);
-    };
-    $("#showMobilePopupOnDesktop").value = twpConfig.get(
-      "showMobilePopupOnDesktop"
-    );
-
-    $("#addPaddingToPage").onchange = (e) => {
-      twpConfig.set("addPaddingToPage", e.target.value);
-    };
-    $("#addPaddingToPage").value = twpConfig.get("addPaddingToPage");
-
     $("#btnShowProxyConfiguration").onclick = (e) => {
       $("#googleProxyContainer").style.display = "block";
       window.scrollTo({
@@ -1525,24 +1515,41 @@ twpConfig
       $("#googleTtsProxyServer").value = googleProxy.ttsServer;
     }
 
-    // donation options
-    if (navigator.language === "pt-BR") {
-      $("#currency").value = "BRL";
-      $("#donateInUSD").style.display = "none";
-    } else {
-      $("#currency").value = "USD";
-      $("#donateInBRL").style.display = "none";
-    }
+    // Render boolean Yes/No selects as toggle switches (after their values are set).
+    enhanceYesNoSelects();
 
-    $("#currency").onchange = (e) => {
-      if (e.target.value === "BRL") {
-        $("#donateInUSD").style.display = "none";
-        $("#donateInBRL").style.display = "block";
-      } else {
-        $("#donateInUSD").style.display = "block";
-        $("#donateInBRL").style.display = "none";
-      }
-    };
+    // Empty-state text for the list widgets (Never/Always translate, etc.).
+    document.querySelectorAll("ul.list").forEach((ul) => {
+      ul.dataset.emptyText =
+        twpI18n.getMessage("msgEmptyList") || "Nothing here yet";
+    });
+
+    // Settings search: filter setting rows across all sections.
+    const searchInput = $("#settingsSearch");
+    if (searchInput) {
+      const sections = document.querySelectorAll("#content > div[id]");
+      searchInput.addEventListener("input", () => {
+        const q = searchInput.value.trim().toLowerCase();
+        if (!q) {
+          document
+            .querySelectorAll(".setting-row[hidden], .settings-card[hidden]")
+            .forEach((el) => el.removeAttribute("hidden"));
+          hashchange(); // restore normal single-tab view
+          return;
+        }
+        sections.forEach((s) => (s.style.display = "block"));
+        document.querySelectorAll(".setting-row").forEach((row) => {
+          row.hidden = !row.textContent.toLowerCase().includes(q);
+        });
+        document.querySelectorAll(".settings-card").forEach((card) => {
+          card.hidden = !card.querySelector(".setting-row:not([hidden])");
+        });
+        sections.forEach((s) => {
+          if (!s.querySelector(".setting-row:not([hidden])"))
+            s.style.display = "none";
+        });
+      });
+    }
   });
 
 window.scrollTo({

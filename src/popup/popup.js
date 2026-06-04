@@ -241,21 +241,10 @@ twpConfig
     );
 
     function updateInterface() {
-      if (currentPageTranslatorService == "yandex") {
-        $("#btnOptions option[value='translateInExternalSite']").textContent =
-          twpI18n.getMessage("msgOpenOnYandexTranslator");
-        $("#iconTranslate").setAttribute(
-          "src",
-          "/icons/yandex-translate-32.png"
-        );
-      } else if (currentPageTranslatorService == "bing") {
-        $("#btnOptions option[value='translateInExternalSite']").textContent =
-          twpI18n.getMessage("btnOpenOnGoogleTranslate");
+      if (currentPageTranslatorService == "bing") {
         $("#iconTranslate").setAttribute("src", "/icons/bing-translate-32.png");
       } else {
         // google
-        $("#btnOptions option[value='translateInExternalSite']").textContent =
-          twpI18n.getMessage("btnOpenOnGoogleTranslate");
         $("#iconTranslate").setAttribute(
           "src",
           "/icons/google-translate-32.png"
@@ -295,125 +284,20 @@ twpConfig
         $("#lblShowTranslatedWhenHoveringThisLang").textContent =
           translatedWhenHoveringThisLangText;
         $("#cbShowTranslatedWhenHoveringThisLang").removeAttribute("disabled");
-
-        if (
-          twpConfig
-            .get("langsToTranslateWhenHovering")
-            .indexOf(originalTabLanguage) === -1
-        ) {
-          $(
-            "option[data-i18n=lblShowTranslatedWhenHoveringThisLang]"
-          ).textContent = translatedWhenHoveringThisLangText;
-        } else {
-          $(
-            "option[data-i18n=lblShowTranslatedWhenHoveringThisLang]"
-          ).textContent = "✔ " + translatedWhenHoveringThisLangText;
-        }
-        $(
-          "option[data-i18n=lblShowTranslatedWhenHoveringThisLang]"
-        ).removeAttribute("hidden");
-
-        const neverTranslateLangText = twpI18n.getMessage(
-          "btnNeverTranslateThisLanguage"
-        );
-        if (
-          twpConfig.get("neverTranslateLangs").indexOf(originalTabLanguage) ===
-          -1
-        ) {
-          $("option[data-i18n=btnNeverTranslateThisLanguage]").textContent =
-            neverTranslateLangText;
-        } else {
-          $("option[data-i18n=btnNeverTranslateThisLanguage]").textContent =
-            "✔ " + neverTranslateLangText;
-        }
-        $("option[data-i18n=btnNeverTranslateThisLanguage]").style.display =
-          "block";
       }
     }
     updateInterface();
 
-    function enableDarkMode() {
-      if (!$("#darkModeElement")) {
-        const el = document.createElement("style");
-        el.setAttribute("id", "darkModeElement");
-        el.setAttribute("rel", "stylesheet");
-        el.textContent = `
-            body {
-                color: rgb(231, 230, 228) !important;
-                background-color: #181a1b !important;
-            }
-            
-            .mdiv, .md, {
-                background-color: rgb(231, 230, 228);
-            }
-
-            .menuDot {
-                background-image:
-                    radial-gradient(rgb(231, 230, 228) 2px, transparent 2px),
-                    radial-gradient(rgb(231, 230, 228) 2px, transparent 2px),
-                    radial-gradient(rgb(231, 230, 228) 2px, transparent 2px);
-            }
-
-            #btnSwitchInterfaces:hover, #divMenu:hover {
-                background-color: #454a4d !important;
-                color: rgb(231, 230, 228) !important;
-            }
-            
-            select {
-                color: rgb(231, 230, 228) !important;
-                background-color: #181a1b !important;
-            }
-
-            hr {
-                border-color: #666;
-            }
-
-            .arrow {
-                border-color: rgb(231, 230, 228);
-            }
-
-            #btnImproveTranslation {
-              color: rgb(231, 230, 228) !important;
-              background-color: #181a1b !important;
-              border: 1px solid #454a4d !important;
-            }
-            `;
-        document.head.appendChild(el);
-      }
-    }
-
-    function disableDarkMode() {
-      if ($("#darkModeElement")) {
-        $("#darkModeElement").remove();
-      }
-    }
-
-    switch (twpConfig.get("darkMode")) {
-      case "auto":
-        if (matchMedia("(prefers-color-scheme: dark)").matches) {
-          enableDarkMode();
-        } else {
-          disableDarkMode();
-        }
-        break;
-      case "yes":
-        enableDarkMode();
-        break;
-      case "no":
-        disableDarkMode();
-        break;
-      default:
-        break;
+    // Theme (light/dark) is driven by twp-theme.css via the data-theme attribute;
+    // see twp-theme.js. "auto" follows the OS (prefers-color-scheme).
+    {
+      const mode = twpConfig.get("darkMode"); // "auto" | "yes" | "no"
+      twpApplyTheme(mode === "yes" ? "dark" : mode === "no" ? "light" : "auto");
     }
 
     $("#btnPatreon").onclick = (e) => {
-      window.open("https://www.patreon.com/filipeps", "_blank");
+      window.open("https://github.com/sponsors/mntxsn", "_blank");
     };
-
-    $("#btnSwitchInterfaces").addEventListener("click", () => {
-      twpConfig.set("useOldPopup", "yes");
-      window.location = "old-popup.html";
-    });
 
     $("#divIconTranslate").addEventListener("click", () => {
       currentPageTranslatorService = twpConfig.swapPageTranslationService();
@@ -516,224 +400,18 @@ twpConfig
         $("#cbShowTranslatedWhenHoveringThisSite").checked =
           twpConfig.get("sitesToTranslateWhenHovering").indexOf(hostname) !==
           -1;
-
-        {
-          const text = twpI18n.getMessage("lblShowTranslateSelectedButton");
-          if (twpConfig.get("showTranslateSelectedButton") !== "yes") {
-            $("option[data-i18n=lblShowTranslateSelectedButton]").textContent =
-              text;
-          } else {
-            $("option[data-i18n=lblShowTranslateSelectedButton]").textContent =
-              "✔ " + text;
-          }
-        }
-        {
-          const text = twpI18n.getMessage("lblShowOriginalTextWhenHovering");
-          if (twpConfig.get("showOriginalTextWhenHovering") !== "yes") {
-            $("option[data-i18n=lblShowOriginalTextWhenHovering]").textContent =
-              text;
-          } else {
-            $("option[data-i18n=lblShowOriginalTextWhenHovering]").textContent =
-              "✔ " + text;
-          }
-        }
-        {
-          const text = twpI18n.getMessage(
-            "lblShowTranslatedWhenHoveringThisSite"
-          );
-          if (
-            twpConfig.get("sitesToTranslateWhenHovering").indexOf(hostname) ===
-            -1
-          ) {
-            $(
-              "option[data-i18n=lblShowTranslatedWhenHoveringThisSite]"
-            ).textContent = text;
-          } else {
-            $(
-              "option[data-i18n=lblShowTranslatedWhenHoveringThisSite]"
-            ).textContent = "✔ " + text;
-          }
-        }
       }
     );
 
-    $("#btnOptions").addEventListener("change", (event) => {
-      const btnOptions = event.target;
-
-      chrome.tabs.query(
-        {
-          active: true,
-          currentWindow: true,
-        },
-        (tabs) => {
-          const hostname = new URL(tabs[0].url).hostname;
-          switch (btnOptions.value) {
-            case "changeLanguage":
-              location = chrome.runtime.getURL(
-                "/popup/improve-translation.html"
-              );
-              break;
-            case "alwaysTranslateThisSite":
-              if (
-                twpConfig.get("alwaysTranslateSites").indexOf(hostname) === -1
-              ) {
-                twpConfig.addSiteToAlwaysTranslate(hostname);
-              } else {
-                twpConfig.removeSiteFromAlwaysTranslate(hostname);
-              }
-              window.close();
-              break;
-            case "neverTranslateThisSite":
-              if (
-                twpConfig.get("neverTranslateSites").indexOf(hostname) === -1
-              ) {
-                twpConfig.addSiteToNeverTranslate(hostname);
-                translateOrRestorePagePage("original");
-              } else {
-                twpConfig.removeSiteFromNeverTranslate(hostname);
-              }
-              window.close();
-              break;
-            case "alwaysTranslateThisLanguage":
-              if (
-                twpConfig
-                  .get("alwaysTranslateLangs")
-                  .indexOf(originalTabLanguage) === -1
-              ) {
-                twpConfig.addLangToAlwaysTranslate(
-                  originalTabLanguage,
-                  hostname
-                );
-              } else {
-                twpConfig.removeLangFromAlwaysTranslate(originalTabLanguage);
-              }
-              window.close();
-              break;
-            case "neverTranslateThisLanguage":
-              if (
-                twpConfig
-                  .get("neverTranslateLangs")
-                  .indexOf(originalTabLanguage) === -1
-              ) {
-                twpConfig.addLangToNeverTranslate(
-                  originalTabLanguage,
-                  hostname
-                );
-                translateOrRestorePagePage("original");
-              } else {
-                twpConfig.removeLangFromNeverTranslate(originalTabLanguage);
-              }
-              window.close();
-              break;
-            case "showTranslateSelectedButton":
-              if (twpConfig.get("showTranslateSelectedButton") === "yes") {
-                twpConfig.set("showTranslateSelectedButton", "no");
-              } else {
-                twpConfig.set("showTranslateSelectedButton", "yes");
-              }
-              window.close();
-              break;
-            case "showOriginalTextWhenHovering":
-              if (twpConfig.get("showOriginalTextWhenHovering") === "yes") {
-                twpConfig.set("showOriginalTextWhenHovering", "no");
-              } else {
-                twpConfig.set("showOriginalTextWhenHovering", "yes");
-              }
-              window.close();
-              break;
-            case "showTranslatedWhenHoveringThisSite":
-              if (
-                twpConfig
-                  .get("sitesToTranslateWhenHovering")
-                  .indexOf(hostname) === -1
-              ) {
-                twpConfig.addSiteToTranslateWhenHovering(hostname);
-              } else {
-                twpConfig.removeSiteFromTranslateWhenHovering(hostname);
-              }
-              window.close();
-              break;
-            case "showTranslatedWhenHoveringThisLang":
-              if (
-                twpConfig
-                  .get("langsToTranslateWhenHovering")
-                  .indexOf(originalTabLanguage) === -1
-              ) {
-                twpConfig.addLangToTranslateWhenHovering(originalTabLanguage);
-              } else {
-                twpConfig.removeLangFromTranslateWhenHovering(
-                  originalTabLanguage
-                );
-              }
-              window.close();
-              break;
-            case "translateInExternalSite":
-              chrome.tabs.query(
-                {
-                  active: true,
-                  currentWindow: true,
-                },
-                (tabs) => {
-                  if (currentPageTranslatorService === "yandex") {
-                    tabsCreate(
-                      `https://translate.yandex.com/translate?view=compact&url=${encodeURIComponent(
-                        tabs[0].url
-                      )}&lang=${twpConfig.get("targetLanguage").split("-")[0]}`
-                    );
-                  } else {
-                    // google
-                    tabsCreate(
-                      `https://translate.google.com/translate?tl=${twpConfig.get(
-                        "targetLanguage"
-                      )}&u=${encodeURIComponent(tabs[0].url)}`
-                    );
-                  }
-                }
-              );
-              break;
-            case "moreOptions":
-              tabsCreate(chrome.runtime.getURL("/options/options.html"));
-              break;
-            case "donate":
-              tabsCreate(
-                chrome.runtime.getURL("/options/options.html#donation")
-              );
-              break;
-            case "translatePDF":
-              tabsCreate("https://pdf.translatewebpages.org/");
-              break;
-            default:
-              break;
-          }
-          btnOptions.value = "options";
-        }
-      );
+    // The three-dots button opens the full options page and closes the popup.
+    // Firefox's toolbar (browserAction) popup ignores window.close() and does
+    // not dismiss on a same-window tab switch; it only closes on focus loss.
+    // So we open the options tab via the background and explicitly drop the
+    // popup's focus with window.blur(), then call window.close() as a fallback
+    // for the page-action popup.
+    $("#btnMenu").addEventListener("click", () => {
+      chrome.runtime.sendMessage({ action: "openOptionsPage" });
+      window.blur();
+      window.close();
     });
-
-    chrome.tabs.query(
-      {
-        active: true,
-        currentWindow: true,
-      },
-      (tabs) => {
-        const hostname = new URL(tabs[0].url).hostname;
-        const textNever = twpI18n.getMessage("btnNeverTranslate");
-        if (twpConfig.get("neverTranslateSites").indexOf(hostname) === -1) {
-          $("option[data-i18n=btnNeverTranslate]").textContent = textNever;
-        } else {
-          $("option[data-i18n=btnNeverTranslate]").textContent =
-            "✔ " + textNever;
-        }
-
-        const textAlways = twpI18n.getMessage("btnAlwaysTranslate");
-        if (twpConfig.get("alwaysTranslateSites").indexOf(hostname) === -1) {
-          $("option[data-i18n=btnAlwaysTranslate]").textContent = textAlways;
-        } else {
-          $("option[data-i18n=btnAlwaysTranslate]").textContent =
-            "✔ " + textAlways;
-        }
-
-        $("option[data-i18n=btnDonate]").innerHTML += " &#10084;";
-      }
-    );
   });

@@ -28,9 +28,6 @@ void (async function () {
   const googleIcon = await fetch(
     chrome.runtime.getURL("/icons/google-translate-32.png")
   ).then((response) => response.blob());
-  const yandexIcon = await fetch(
-    chrome.runtime.getURL("/icons/yandex-translate-32.png")
-  ).then((response) => response.blob());
   const bingIcon = await fetch(
     chrome.runtime.getURL("/icons/bing-translate-32.png")
   ).then((response) => response.blob());
@@ -227,8 +224,6 @@ void (async function () {
     const service = twpConfig.get("pageTranslatorService");
     if (service === "google") {
       serviceIconElement.src = URL.createObjectURL(googleIcon);
-    } else if (service === "yandex") {
-      serviceIconElement.src = URL.createObjectURL(yandexIcon);
     } else if (service === "bing") {
       serviceIconElement.src = URL.createObjectURL(bingIcon);
     }
