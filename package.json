@@ -1,6 +1,6 @@
 {
   "name": "pagelate",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Browser extension that translates whole web pages and selected text using Google or Bing. Fork of TWP - Translate Web Pages.",
   "homepage": "https://github.com/mntxsn/pagelate",
   "repository": {

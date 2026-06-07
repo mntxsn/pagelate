@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.1
+
+- **Auto-translate selected text** (optional): a new "Automatically translate
+  selected text (skip the button)" setting in Options → Selected text. When on,
+  selecting text shows the translation immediately instead of the click button.
+  Off by default.
+
 ## 1.0.0
 
 First Pagelate release. Highlights on top of the fork baseline below:
