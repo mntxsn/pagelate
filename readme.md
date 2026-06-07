@@ -8,12 +8,10 @@ For Firefox and Chromium-based browsers.
 
 ## Install
 
-> **Not published yet.** Store links will be added here once the listings are live.
-
+- **Firefox Add-ons (AMO):** [Pagelate – Translate Web Pages](https://addons.mozilla.org/firefox/addon/pagelate-translate-web-pages/)
 - **Chrome Web Store:** _coming soon_ <!-- https://chromewebstore.google.com/detail/<id> -->
-- **Firefox Add-ons (AMO):** _coming soon_ <!-- https://addons.mozilla.org/firefox/addon/<slug>/ -->
 
-Until then, load an unpacked build — see [Build](#build).
+Or load an unpacked build — see [Build](#build).
 
 ## Features
 
