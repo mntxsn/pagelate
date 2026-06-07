@@ -3,13 +3,16 @@
 Translate whole web pages and selected text in real time using Google or Bing.
 For Firefox and Chromium-based browsers.
 
+[![Get it for Firefox](https://img.shields.io/badge/Firefox-Add--ons-FF7139?logo=firefoxbrowser&logoColor=white)](https://addons.mozilla.org/firefox/addon/pagelate-translate-web-pages/)
+[![Get it for Chrome](https://img.shields.io/badge/Chrome-Web%20Store-4285F4?logo=googlechrome&logoColor=white)](https://chromewebstore.google.com/detail/laoiicghdpoomdjjolbkagjiggjccafm)
+
 > Pagelate is a fork of [TWP – Translate Web Pages](https://github.com/FilipePS/Traduzir-paginas-web)
 > by Filipe Ps, continued independently with a modernized UI and a Manifest V3 codebase.
 
 ## Install
 
 - **Firefox Add-ons (AMO):** [Pagelate – Translate Web Pages](https://addons.mozilla.org/firefox/addon/pagelate-translate-web-pages/)
-- **Chrome Web Store:** _coming soon_ <!-- https://chromewebstore.google.com/detail/<id> -->
+- **Chrome Web Store:** [Pagelate – Translate Web Pages](https://chromewebstore.google.com/detail/laoiicghdpoomdjjolbkagjiggjccafm)
 
 Or load an unpacked build — see [Build](#build).
 
