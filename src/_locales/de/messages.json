@@ -137,6 +137,9 @@
   "lblShowTranslateSelectedButton": {
     "message": "Schaltfläche zur Übersetzung des ausgewählten Textes anzeigen"
   },
+  "lblTranslateSelectedAutomatically": {
+    "message": "Markierten Text automatisch übersetzen (ohne Schaltfläche)"
+  },
   "msgAutomatic": {
     "message": "Automatisch"
   },

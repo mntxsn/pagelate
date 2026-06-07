@@ -31,6 +31,7 @@ const twpConfig = (function () {
     showButtonInTheAddressBar: "yes",
     showOriginalTextWhenHovering: "no",
     showTranslateSelectedButton: "yes",
+    translateSelectedAutomatically: "no", // translate selection at once, skipping the button
     whenShowMobilePopup: "when-necessary", // when-necessary only-when-i-touch always-show
     useOldPopup: "yes",
     darkMode: "auto", // auto yes no

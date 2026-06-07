@@ -41,6 +41,9 @@ Promise.all([twpConfig.onReady(), getTabHostName()]).then(function (_) {
   let showTranslateSelectedButton = twpConfig.get(
     "showTranslateSelectedButton"
   );
+  let translateSelectedAutomatically = twpConfig.get(
+    "translateSelectedAutomatically"
+  );
   let dontShowIfIsNotValidText = twpConfig.get("dontShowIfIsNotValidText");
   let dontShowIfPageLangIsTargetLang = twpConfig.get(
     "dontShowIfPageLangIsTargetLang"
@@ -798,6 +801,10 @@ Promise.all([twpConfig.onReady(), getTabHostName()]).then(function (_) {
         showTranslateSelectedButton = newValue;
         updateEventListener();
         break;
+      case "translateSelectedAutomatically":
+        translateSelectedAutomatically = newValue;
+        updateEventListener();
+        break;
       case "dontShowIfIsNotValidText":
         dontShowIfIsNotValidText = newValue;
         break;
@@ -1051,6 +1058,13 @@ Promise.all([twpConfig.onReady(), getTabHostName()]).then(function (_) {
       (dontShowIfIsNotValidText != "yes" || isValidText(selectedText))
     ) {
       init();
+
+      // Skip the button and translate the selection right away when enabled.
+      if (translateSelectedAutomatically == "yes") {
+        translateSelText();
+        return;
+      }
+
       if (platformInfo.isMobile.any) {
         eButtonTransSelText.style.left = window.innerWidth - 45 + "px";
         eButtonTransSelText.style.top = clientY + "px";
@@ -1156,7 +1170,8 @@ Promise.all([twpConfig.onReady(), getTabHostName()]).then(function (_) {
 
   function updateEventListener() {
     if (
-      showTranslateSelectedButton == "yes" &&
+      (showTranslateSelectedButton == "yes" ||
+        translateSelectedAutomatically == "yes") &&
       (awaysTranslateThisSite ||
         (translateThisSite && translateThisLanguage)) &&
       ((dontShowIfPageLangIsTargetLang == "yes" &&

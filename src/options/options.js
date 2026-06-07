@@ -767,6 +767,13 @@ twpConfig
       twpConfig.get("showTranslateSelectedButton")
     );
 
+    $("#translateSelectedAutomatically").onchange = (e) => {
+      twpConfig.set("translateSelectedAutomatically", e.target.value);
+    };
+    $("#translateSelectedAutomatically").value = twpConfig.get(
+      "translateSelectedAutomatically"
+    );
+
     $("#dontShowIfIsNotValidText").onchange = (e) => {
       twpConfig.set(
         "dontShowIfIsNotValidText",

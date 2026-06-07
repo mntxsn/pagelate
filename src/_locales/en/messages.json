@@ -137,6 +137,9 @@
   "lblShowTranslateSelectedButton": {
     "message": "Show the button to translate the selected text"
   },
+  "lblTranslateSelectedAutomatically": {
+    "message": "Automatically translate selected text (skip the button)"
+  },
   "msgAutomatic": {
     "message": "Automatic"
   },
