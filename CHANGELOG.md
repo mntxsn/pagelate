@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.0.2
+
+- **Chrome:** the Keyboard shortcuts section now shows only the "Open native
+  shortcut manager" button instead of a disabled in-page list (Chrome manages
+  shortcuts via `chrome://extensions/shortcuts`).
+- **Firefox:** the address-bar (page action) icon is now theme-aware — a light
+  glyph in dark mode, a dark glyph in light mode (page_action SVG context-fill
+  isn't reliably themed in the URL bar).
+- **Options:** added the missing divider above the advanced selected-text
+  options.
+
 ## 1.0.1
 
 - **Auto-translate selected text** (optional): a new "Automatically translate
