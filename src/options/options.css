@@ -240,3 +240,10 @@ select {
 .patreonButton img:hover {
   scale: 1.02;
 }
+
+/* The advanced selected-text options live in a wrapper div, so the generic
+   `.setting-row + .setting-row` divider doesn't reach the first row inside it.
+   Add the missing divider above it. */
+#translateSelectedAdvancedOptions > .setting-row:first-child {
+  border-top: 1px solid var(--twp-border);
+}

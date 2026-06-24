@@ -1099,19 +1099,14 @@ twpConfig
         resetKey.style.display = "none";
       };
 
-      //*
-      if (!canEditShortcutsInPage) {
-        // Chrome: in-page editing isn't supported; keep the native manager.
-        input.setAttribute("disabled", "");
-        resetKey.style.display = "none";
-        removeKey.style.display = "none";
-      } else {
-        $("#openNativeShortcutManager").style.display = "none";
-      }
-      // */
+      // In-page editing is available (Firefox); hide the native manager button.
+      $("#openNativeShortcutManager").style.display = "none";
     }
 
-    if (typeof chrome.commands !== "undefined") {
+    // Only build the in-page shortcut editor where commands.update() works
+    // (Firefox). On Chrome we keep just the "Open native shortcut manager"
+    // button (chrome://extensions/shortcuts) instead of a disabled list.
+    if (canEditShortcutsInPage && typeof chrome.commands !== "undefined") {
       chrome.commands.getAll((results) => {
         for (const result of results) {
           addHotkey(result.name, result.description);
