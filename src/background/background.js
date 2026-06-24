@@ -489,15 +489,21 @@ twpConfig.onReady(() => {
         chrome.tabs.get(tabId, (tabInfo) => {
           if (chrome.pageAction) {
             resetPageAction(tabId);
-            // Address-bar icon: monochrome (Firefox themes it via SVG
-            // context-fill, dark on light toolbars / light on dark). When the
-            // page is translated and the setting is on, switch to the filled
-            // colored logo (indigo card + white glyphs) as a "translated" highlight.
+            // Address-bar icon: monochrome, picked for the current color scheme
+            // (light glyph on dark mode, dark glyph on light) because page_action
+            // SVG context-fill isn't reliably themed in the Firefox URL bar. When
+            // the page is translated and the setting is on, switch to the filled
+            // colored logo as a "translated" highlight.
+            const darkScheme =
+              typeof matchMedia !== "undefined" &&
+              matchMedia("(prefers-color-scheme: dark)").matches;
             const pageActionIcon =
               pageLanguageState === "translated" &&
               twpConfig.get("popupBlueWhenSiteIsTranslated") === "yes"
                 ? "/icons/icon-32.png"
-                : "/icons/icon-mono.svg";
+                : darkScheme
+                ? "/icons/icon-mono-light.svg"
+                : "/icons/icon-mono-dark.svg";
             chrome.pageAction.setIcon({
               tabId: tabId,
               path: pageActionIcon,
